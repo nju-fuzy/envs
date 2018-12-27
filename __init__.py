@@ -514,7 +514,7 @@ for game in ["freeway"]:
 # ----------------------------------------
 # Create envs with rewards defined by self
 # Following is an example for Atlandis
-
+#########
 for game in ["atlantis"]:
     name = ''.join([g.capitalize() for g in game.split('_')])
     reward_type_nums = 4
