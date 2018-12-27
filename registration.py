@@ -6,7 +6,7 @@ from gym import error, logger
 #
 # 2016-10-31: We're experimentally expanding the environment ID format
 # to include an optional username.
-env_id_re = re.compile(r'^(?:[\w:-]+\/)?([\w:.-]+)-v(\d+)$')
+env_id_re = re.compile(r'^(?:[\w:-]+\/)?([\w:.-]+)-v(\d+)(?:-reward-\d+){0,1}$')
 
 def load(name):
     import pkg_resources # takes ~400ms to load, so we import it lazily

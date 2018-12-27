@@ -58,6 +58,13 @@ register(
 )
 
 register(
+    id='CartPoleTest-v0',
+    entry_point='gym.envs.classic_control:CartPoleTestEnv',
+    max_episode_steps=200,
+    reward_threshold=195.0,
+)
+
+register(
     id='CartPole-v1',
     entry_point='gym.envs.classic_control:CartPoleEnv',
     max_episode_steps=500,
@@ -421,9 +428,166 @@ for reward_type in ['sparse', 'dense']:
         max_episode_steps=100,
     )
 
-# Atari
-# ----------------------------------------
 
+
+############################################################
+# Change code begin!
+############################################################
+# Atari Other rewards
+# ----------------------------------------
+# Create envs with rewards defined by self
+# Following is an example for Freeway
+
+for game in ["freeway"]:
+    name = ''.join([g.capitalize() for g in game.split('_')])
+    reward_type_nums = 4
+
+    for rt in range(2, reward_type_nums + 1):
+        nondeterministic = False
+        obs_type = "image"
+
+        register(
+            id='{}-v0-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'repeat_action_probability': 0.25, 'reward_type' : rt},
+            max_episode_steps=10000,
+            nondeterministic=nondeterministic,
+        )
+
+        register(
+            id='{}-v4-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'reward_type' : rt},
+            max_episode_steps=100000,
+            nondeterministic=nondeterministic,
+        )
+
+        # Standard Deterministic (as in the original DeepMind paper)
+        if game == 'space_invaders':
+            frameskip = 3
+        else:
+            frameskip = 4
+
+        # Use a deterministic frame skip.
+        register(
+            id='{}Deterministic-v0-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': frameskip, 'repeat_action_probability': 0.25, 'reward_type' : rt},
+            max_episode_steps=100000,
+            nondeterministic=nondeterministic,
+        )
+
+        register(
+            id='{}Deterministic-v4-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': frameskip, 'reward_type' : rt},
+            max_episode_steps=100000,
+            nondeterministic=nondeterministic,
+        )
+
+        register(
+            id='{}NoFrameskip-v0-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': 1, 'repeat_action_probability': 0.25, 'reward_type' : rt}, # A frameskip of 1 means we get every frame
+            max_episode_steps=frameskip * 100000,
+            nondeterministic=nondeterministic,
+        )
+
+        # No frameskip. (Atari has no entropy source, so these are
+        # deterministic environments.)
+        register(
+            id='{}NoFrameskip-v4-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': 1, 'reward_type' : rt}, # A frameskip of 1 means we get every frame
+            max_episode_steps=frameskip * 100000,
+            nondeterministic=nondeterministic,
+        )
+
+############################################################
+# Change code finished!
+############################################################
+
+############################################################
+# Change code begin!
+############################################################
+# Atari Other rewards
+# ----------------------------------------
+# Create envs with rewards defined by self
+# Following is an example for Atlandis
+
+for game in ["atlantis"]:
+    name = ''.join([g.capitalize() for g in game.split('_')])
+    reward_type_nums = 4
+
+    for rt in range(2, reward_type_nums + 1):
+        nondeterministic = False
+        obs_type = "image"
+
+        register(
+            id='{}-v0-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'repeat_action_probability': 0.25, 'reward_type' : rt},
+            max_episode_steps=10000,
+            nondeterministic=nondeterministic,
+        )
+
+        register(
+            id='{}-v4-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'reward_type' : rt},
+            max_episode_steps=100000,
+            nondeterministic=nondeterministic,
+        )
+
+        # Standard Deterministic (as in the original DeepMind paper)
+        if game == 'space_invaders':
+            frameskip = 3
+        else:
+            frameskip = 4
+
+        # Use a deterministic frame skip.
+        register(
+            id='{}Deterministic-v0-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': frameskip, 'repeat_action_probability': 0.25, 'reward_type' : rt},
+            max_episode_steps=100000,
+            nondeterministic=nondeterministic,
+        )
+
+        register(
+            id='{}Deterministic-v4-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': frameskip, 'reward_type' : rt},
+            max_episode_steps=100000,
+            nondeterministic=nondeterministic,
+        )
+
+        register(
+            id='{}NoFrameskip-v0-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': 1, 'repeat_action_probability': 0.25, 'reward_type' : rt}, # A frameskip of 1 means we get every frame
+            max_episode_steps=frameskip * 100000,
+            nondeterministic=nondeterministic,
+        )
+
+        # No frameskip. (Atari has no entropy source, so these are
+        # deterministic environments.)
+        register(
+            id='{}NoFrameskip-v4-reward-{}'.format(name, rt),
+            entry_point='gym.envs.atari:Atari{}Env'.format(name),
+            kwargs={'game': game, 'obs_type': obs_type, 'frameskip': 1, 'reward_type' : rt}, # A frameskip of 1 means we get every frame
+            max_episode_steps=frameskip * 100000,
+            nondeterministic=nondeterministic,
+        )
+
+############################################################
+# Change code finished!
+############################################################
+
+
+
+# Atari Other rewards
+# ----------------------------------------
 # # print ', '.join(["'{}'".format(name.split('.')[0]) for name in atari_py.list_games()])
 for game in ['air_raid', 'alien', 'amidar', 'assault', 'asterix', 'asteroids', 'atlantis',
     'bank_heist', 'battle_zone', 'beam_rider', 'berzerk', 'bowling', 'boxing', 'breakout', 'carnival',
