@@ -19,10 +19,10 @@ def to_ram(ale):
 from PIL import Image
 
 
-class AtariAtlantisEnv(gym.Env, utils.EzPickle):
+class AtariSpaceInvadersEnv(gym.Env, utils.EzPickle):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self, game='atlantis', obs_type='image', frameskip=(2, 5), repeat_action_probability=0., reward_type = 2):
+    def __init__(self, game='space_invaders', obs_type='image', frameskip=(2, 5), repeat_action_probability=0., reward_type = 2):
         """Frameskip should be either a tuple (indicating a random range to
         choose from, with the top value exclude), or an int."""
 
@@ -116,7 +116,7 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
                 lost_lives = pre_lives - now_lives
                 if lost_lives > 0:
                     reward = -5.0 * lost_lives
-                if now_lives == 6 and pre_lives == 0:
+                if now_lives == 3 and pre_lives == 0:
                     reward = 0.0
         return reward
     #############################################

@@ -10,7 +10,11 @@ from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
 
-class CartPoleTestEnv(gym.Env):
+#####################################
+from PIL import Image
+#####################################
+
+class CartPoleRewardEnv(gym.Env):
     """
     Description:
         A pole is attached by an un-actuated joint to a cart, which moves along a frictionless track. The pendulum starts upright, and the goal is to prevent it from falling over by increasing and reducing the cart's velocity.
@@ -53,7 +57,14 @@ class CartPoleTestEnv(gym.Env):
         'video.frames_per_second' : 50
     }
 
-    def __init__(self):
+    def __init__(self, obs_type = 'RAM', reward_type = 1):
+        ''' obs_type : one of ['Image', 'RAM']
+            reward_type :
+                0 means a list of all type rewards
+                1 means origin reward
+                2 means position offset
+                3 means angle offset
+        '''
         self.gravity = 9.8
         self.masscart = 1.0
         self.masspole = 0.1
@@ -84,6 +95,11 @@ class CartPoleTestEnv(gym.Env):
 
         self.steps_beyond_done = None
 
+        ############################################
+        self.obs_type = obs_type
+        self.reward_type = reward_type
+        ############################################
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
@@ -92,6 +108,12 @@ class CartPoleTestEnv(gym.Env):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         state = self.state
         x, x_dot, theta, theta_dot = state
+
+        #############################
+        # save old observation
+        old_x, old_x_dot, old_theta, old_theta_dot = x, x_dot, theta, theta_dot
+        #############################
+
         force = self.force_mag if action==1 else -self.force_mag
         costheta = math.cos(theta)
         sintheta = math.sin(theta)
@@ -116,23 +138,151 @@ class CartPoleTestEnv(gym.Env):
         done = bool(done)
 
         if not done:
-            reward = 10.0
+            reward = 1.0
         elif self.steps_beyond_done is None:
             # Pole just fell!
             self.steps_beyond_done = 0
-            reward = 10.0
+            reward = 1.0
         else:
             if self.steps_beyond_done == 0:
                 logger.warn("You are calling 'step()' even though this environment has already returned done = True. You should always call 'reset()' once you receive 'done = True' -- any further steps are undefined behavior.")
             self.steps_beyond_done += 1
             reward = 0.0
 
-        return np.array(self.state), reward, done, {}
+        ############################################################
+        # position offset as reward
+        if self.reward_type == 2:
+            reward = self.get_reward(x, old_x, theta, old_theta, done, 2)
+
+        # angle offset ad reward
+        if self.reward_type == 3:
+            reward = self.get_reward(x, old_x, theta, old_theta, done, 3)
+
+        # reward 0, return all reward
+        if self.reward_type == 0:
+            reward1 = reward
+            reward2 = self.get_reward(x, old_x, theta, old_theta, done, 2)
+            reward3 = self.get_reward(x, old_x, theta, old_theta, done, 3)
+            reward = [reward1, reward2, reward3]
+        ############################################################
+
+        ############################################################
+        # init viewer
+        if self.viewer is None:
+            self.init_viewer(visible = False)
+        ############################################################
+
+        ############################################################
+        # observation is image or ram
+        # image is numpy.array with shape (400, 600, 3)
+        # ram is numpy.array with shape (4,) as : (x, x_dot, angle, angle_dot)
+        if self.obs_type == 'Image':
+            #obs = self.viewer.get_screen()
+            obs = self.viewer.get_array()
+            # obs with shape (400, 600, 3)
+            # reshape to (160, 210, 3) and swap w-axis and h-axis
+            img = Image.fromarray(obs)
+            img = img.resize((160, 210), Image.ANTIALIAS)
+            obs = np.array(img)
+            #obs = np.swapaxes(obs, 0, 1)
+        elif self.obs_type == 'RAM':
+            obs = np.array(self.state)
+        ############################################################
+
+        return obs, reward, done, {}
 
     def reset(self):
         self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(4,))
         self.steps_beyond_done = None
         return np.array(self.state)
+
+    ###########################################
+    # get reward
+    ###########################################
+    def get_reward(self, x, old_x, theta, old_theta, done, reward_type):
+        ''' Get reward : 
+            reward_type = 2:
+                position_offset - old_positon_offset
+            reward_type = 3:
+                angle_offset - old_angle_offset
+            done:
+                if done : reward = 0.0
+        '''
+        reward = 0.0
+        if not done:
+            if reward_type == 2:
+                # position offset
+                pos_offset = abs(x) / self.x_threshold
+                old_pos_offset = abs(old_x) / self.x_threshold
+                reward = old_pos_offset - pos_offset
+            elif reward_type == 3:
+                # angle offset
+                angle_offset = abs(theta) / self.theta_threshold_radians
+                old_angle_offset = abs(old_theta) / self.theta_threshold_radians
+                reward = old_angle_offset - angle_offset
+
+        return reward
+
+    ###########################################
+    ###########################################
+
+    ###########################################
+    # init viwer
+    ###########################################
+    def init_viewer(self, visible = False):
+        screen_width = 600
+        screen_height = 400
+
+        world_width = self.x_threshold*2
+        scale = screen_width/world_width
+        carty = 100 # TOP OF CART
+        polewidth = 10.0
+        polelen = scale * (2 * self.length)
+        cartwidth = 50.0
+        cartheight = 30.0
+
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(screen_width, screen_height, visible = False)
+            l,r,t,b = -cartwidth/2, cartwidth/2, cartheight/2, -cartheight/2
+            axleoffset =cartheight/4.0
+            cart = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
+            self.carttrans = rendering.Transform()
+            cart.add_attr(self.carttrans)
+            self.viewer.add_geom(cart)
+            l,r,t,b = -polewidth/2,polewidth/2,polelen-polewidth/2,-polewidth/2
+            pole = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
+            pole.set_color(.8,.6,.4)
+            self.poletrans = rendering.Transform(translation=(0, axleoffset))
+            pole.add_attr(self.poletrans)
+            pole.add_attr(self.carttrans)
+            self.viewer.add_geom(pole)
+            self.axle = rendering.make_circle(polewidth/2)
+            self.axle.add_attr(self.poletrans)
+            self.axle.add_attr(self.carttrans)
+            self.axle.set_color(.5,.5,.8)
+            self.viewer.add_geom(self.axle)
+            self.track = rendering.Line((0,carty), (screen_width,carty))
+            self.track.set_color(0,0,0)
+            self.viewer.add_geom(self.track)
+
+            self._pole_geom = pole
+
+        if self.state is None: return None
+
+        # Edit the pole polygon vertex
+        pole = self._pole_geom
+        l,r,t,b = -polewidth/2,polewidth/2,polelen-polewidth/2,-polewidth/2
+        pole.v = [(l,b), (l,t), (r,t), (r,b)]
+
+        x = self.state
+        cartx = x[0]*scale+screen_width/2.0 # MIDDLE OF CART
+        self.carttrans.set_translation(cartx, carty)
+        self.poletrans.set_rotation(-x[2])
+    ##########################################################
+    # done
+    ##########################################################
+
 
     def render(self, mode='human'):
         screen_width = 600

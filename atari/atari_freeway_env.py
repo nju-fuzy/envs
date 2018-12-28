@@ -101,18 +101,26 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         ob = self._get_obs()
 
         ############################################################
-        if self.reward_type > 1:
-            reward = self.get_reward(ob, pre_ob, self.reward_type)
-            print(reward)
+        # done?
+        done = self.ale.game_over()
+
+        # reward_type = 2 : height change
+        if self.reward_type == 2:
+            reward = self.get_reward(ob, pre_ob, done, self.reward_type)
+
+        if self.reward_type == 0:
+            reward1 = reward
+            reward2 = self.get_reward(ob, pre_ob, done, 2)
+            reward = [reward1, reward2]
         ############################################################
 
-        return ob, reward, self.ale.game_over(), {"ale.lives": self.ale.lives()}
+        return ob, reward, done, {"ale.lives": self.ale.lives()}
 
 
     ############################################################
     # add self
     ############################################################
-    def get_reward(self, ob, pre_ob, reward_type):
+    def get_reward(self, ob, pre_ob, done, reward_type):
         ''' Get reward from images!
         @Params:
             ob : observation at current state, numpy.array shape = (210, 160, 3)
@@ -125,9 +133,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         height = self.get_height(ob)
         move = height - pre_height
 
-        print(height, pre_height)
-
-        if abs(move) > 100.0:
+        if done or abs(move) > 100.0:
             move = 0.0
         return move
 

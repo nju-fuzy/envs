@@ -50,16 +50,70 @@ register(
 # Classic
 # ----------------------------------------
 
+####################################################
+# CartPoleReward
+####################################################
+for game in ["cart_pole"]:
+    name = ''.join([g.capitalize() for g in game.split('_')])
+    reward_type_nums = 3
+
+    for obs_type in ['RAM', 'Image']:
+        for rt in range(0, reward_type_nums + 1):
+            register(
+                id='CartPole{}-v0-reward-{}'.format(obs_type, rt),
+                entry_point='gym.envs.classic_control:CartPoleRewardEnv',
+                kwargs={'reward_type' : rt, "obs_type" : obs_type},
+                max_episode_steps=200,
+                reward_threshold=195.0,
+            )
+
+            register(
+                id='CartPole{}-v1-reward-{}'.format(obs_type, rt),
+                entry_point='gym.envs.classic_control:CartPoleRewardEnv',
+                kwargs={'reward_type' : rt, "obs_type" : obs_type},
+                max_episode_steps=500,
+                reward_threshold=475.0,
+            )
+####################################################
+
+####################################################
+# MountainCarReward
+####################################################
+for game in ["mountain_car"]:
+    name = ''.join([g.capitalize() for g in game.split('_')])
+    reward_type_nums = 5
+
+    for obs_type in ['RAM', 'Image']:
+        for rt in range(0, reward_type_nums + 1):
+            register(
+                id='{}{}-v0-reward-{}'.format(name, obs_type, rt),
+                entry_point='gym.envs.classic_control:{}RewardEnv'.format(name),
+                kwargs={'reward_type' : rt, "obs_type" : obs_type},
+                max_episode_steps=200,
+                reward_threshold=110.0,
+            )
+####################################################
+
+####################################################
+# AcrobotReward
+####################################################
+for game in ["acrobot"]:
+    name = ''.join([g.capitalize() for g in game.split('_')])
+    reward_type_nums = 2
+
+    for obs_type in ['RAM', 'Image']:
+        for rt in range(0, reward_type_nums + 1):
+            register(
+                id='{}{}-v1-reward-{}'.format(name, obs_type, rt),
+                entry_point='gym.envs.classic_control:{}RewardEnv'.format(name),
+                kwargs={'reward_type' : rt, "obs_type" : obs_type},
+                max_episode_steps=500,
+            )
+####################################################
+
 register(
     id='CartPole-v0',
     entry_point='gym.envs.classic_control:CartPoleEnv',
-    max_episode_steps=200,
-    reward_threshold=195.0,
-)
-
-register(
-    id='CartPoleTest-v0',
-    entry_point='gym.envs.classic_control:CartPoleTestEnv',
     max_episode_steps=200,
     reward_threshold=195.0,
 )
@@ -440,9 +494,9 @@ for reward_type in ['sparse', 'dense']:
 
 for game in ["freeway"]:
     name = ''.join([g.capitalize() for g in game.split('_')])
-    reward_type_nums = 4
+    reward_type_nums = 2
 
-    for rt in range(2, reward_type_nums + 1):
+    for rt in range(0, reward_type_nums + 1):
         nondeterministic = False
         obs_type = "image"
 
@@ -513,13 +567,13 @@ for game in ["freeway"]:
 # Atari Other rewards
 # ----------------------------------------
 # Create envs with rewards defined by self
-# Following is an example for Atlandis
+# Following is an example for Atlandis and SpaceInvaders
 #########
-for game in ["atlantis"]:
+for game in ["atlantis", "space_invaders"]:
     name = ''.join([g.capitalize() for g in game.split('_')])
-    reward_type_nums = 4
+    reward_type_nums = 2
 
-    for rt in range(2, reward_type_nums + 1):
+    for rt in range(0, reward_type_nums + 1):
         nondeterministic = False
         obs_type = "image"
 

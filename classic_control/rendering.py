@@ -43,12 +43,12 @@ def get_display(spec):
         raise error.Error('Invalid display specification: {}. (Must be a string like :0 or None.)'.format(spec))
 
 class Viewer(object):
-    def __init__(self, width, height, display=None):
+    def __init__(self, width, height, display=None, visible = True):
         display = get_display(display)
 
         self.width = width
         self.height = height
-        self.window = pyglet.window.Window(width=width, height=height, display=display)
+        self.window = pyglet.window.Window(width=width, height=height, display=display, visible = visible)
         self.window.on_close = self.window_closed_by_user
         self.isopen = True
         self.geoms = []
@@ -141,6 +141,23 @@ class Viewer(object):
 
     def __del__(self):
         self.close()
+
+    #############################################
+    # Add to get screen image!
+    #############################################
+    def get_screen(self):
+        ''' Return an arr with shape (400, 600, 3)
+        '''
+        arr = None
+        buffer = pyglet.image.get_buffer_manager().get_color_buffer()
+        image_data = buffer.get_image_data()
+        arr = np.fromstring(image_data.data, dtype=np.uint8, sep='')
+        arr = arr.reshape(buffer.height, buffer.width, 4)
+        arr = arr[::-1,:,0:3]
+        return arr
+    ################################################
+    # Add finished!
+    ################################################
 
 def _add_attrs(geom, attrs):
     if "color" in attrs:
