@@ -55,6 +55,8 @@
      # XXX-v0 等价于 XXX-v0-reward-0
 
 
+
+
 #### Classic Control
   ## dir : envs/classic_control/
 
@@ -137,4 +139,108 @@
        # 定义的Image的目前还不能直接使用baselines训练
        # 注意Acrobot-v1而不是v0
 
+
+
+#### PLE environment(PyGame Learning Environment)
+  ## 背景说明
+     Atari小游戏是基于ALE开发的，但是Atari小游戏并不会返回一些内在状态信息，比如坐标位置等等
+     在PLE中也有几个小游戏，包括Catcher, Monster Kong, FlappyBird, Pixelcopter, Pong, PuckWorld, RaycastMaze, Snake, WaterWorld
+     下面就是如何修改PLE提供的小游戏的reward，具体包括两个步骤:
+        (1) 如何将这些小游戏统一到gym中，即通过gym.make("FlappyBird-v0")来调用的类型
+        (2) 修改reward
+
+  ## gym中调用PLE
+     # refer link1:
+       https://github.com/openai/gym/tree/master/gym/envs  # gym中如何新建环境
+     # refer link2:
+       https://pygame-learning-environment.readthedocs.io/en/latest/user/games/monsterkong.html  # PLE官网
+     # refer link3:
+       https://github.com/lusob/gym-ple   # gym 与 ple的重要桥梁
+
+     # step1: 安装PLE, 参考link2左侧Home/Installation
+       $ git clone https://github.com/ntasfi/PyGame-Learning-Environment.git
+       $ cd PyGame-Learning-Environment
+       $ pip install -e .
+
+     # step2: 安装gym-ple, 参考link3
+       $ git clone https://github.com/lusob/gym-ple.git
+       $ cd gym-ple/
+       $ pip install -e .
+
+     # step3: 融合
+       # 复制 gym-ple/gym_ple 文件夹到 gym/envs/ 下面
+         $ mv gym-ple/gym_ple XXX/gym/envs/
+       # 现在进入到gym/envs/gym_ple目录下
+         $ cd gym/envs.gym_ple/
+       # 将__init__.py里面for循环注册的部分剪切到gym/envs/__init__.py中
+         修改一下entry_point路径: entry_point='gym.envs.gym_ple:PLEEnv'
+       # 然后将__init__.py里面全部删掉
+         只保留一行: from gym.envs.gym_ple.ple_env import PLEEnv
+
+     # step4: 收尾
+       此时就可以把安装的gym-ple删除掉了，已经用不到了
+       (一定要删掉不然注册游戏名字时会冲突)
+
+  ## 测试
+     # 现在可以在gym中直接import gym，然后gym.make("Flappy-Bird-v0")了
+
+  ## getGameState()
+     # 为了修改reward，需要调用getGameState()获得程序的内在信息
+     # 直接调用会报错
+     # 需要修改gym/envs/gym_ple/ple_env.py文件
+     # 具体修改见文件
+     # 参考链接: https://pygame-learning-environment.readthedocs.io/en/latest/user/tutorial/non_visual_state.html
+
+  ## dir : envs/gym_ple/
+
+  ## Catcher
+     # 新增文件: envs/gym_ple/catcher_ple_env.py
+     # 修改文件: envs/gym_ple/__init__.py            # 在此文件导入catcher_ple_env.py模块
+                 envs/__init__.py                    # 在此文件注册环境名
+     # 新增reward类型:
+       reward-0 : [reward-1, reward-2]
+       reward-1 : 原始的reward
+       reward-2 : 挡板与物体水平距离的改变量
+     # 最终环境名:
+       Catcher-v0                                    # 原始gym提供的reward的环境
+       CatcherRAM-v0-reward-0                        # getGameState() + [reward-1, reward-2]
+       CatcherRAM-v0-reward-1                        # getGameState() + reward-1
+       CatcherRAM-v0-reward-2                        # getGameState() + reward-2
+       CatcherImage-v0-reward-0                      # image (64, 64, 3) + [reward-1, reward-2]
+       CatcherImage-v0-reward-1                      # image (64, 64, 3) + reward-1
+       CatcherImage-v0-reward-2                      # image (64, 64, 3) + reward-2
+
+  ## FlappyBird
+     # 新增文件: envs/gym_ple/flappy_bird_ple_env.py
+     # 修改文件: envs/gym_ple/__init__.py            # 在此文件导入flappy_bird_ple_env.py模块
+                 envs/__init__.py                    # 在此文件注册环境名
+     # 新增reward类型:
+       reward-0 : [reward-1, reward-2]
+       reward-1 : 原始的reward
+       reward-2 : 与下一个管道的中间位置的竖直距离的改变量
+     # 最终环境名:
+       FlappyBird-v0                                    # 原始gym提供的reward的环境
+       FlappyBirdRAM-v0-reward-0                        # getGameState() + [reward-1, reward-2]
+       FlappyBirdRAM-v0-reward-1                        # getGameState() + reward-1
+       FlappyBirdRAM-v0-reward-2                        # getGameState() + reward-2
+       FlappyBirdImage-v0-reward-0                      # image (500, 288, 3) + [reward-1, reward-2]
+       FlappyBirdImage-v0-reward-1                      # image (500, 288, 3) + reward-1
+       FlappyBirdImage-v0-reward-2                      # image (500, 288, 3) + reward-2
+
+  ## WaterWorld
+     # 新增文件: envs/gym_ple/water_world_ple_env.py
+     # 修改文件: envs/gym_ple/__init__.py            # 在此文件导入water_world_ple_env.py模块
+                 envs/__init__.py                    # 在此文件注册环境名
+     # 新增reward类型:
+       reward-0 : [reward-1, reward-2]
+       reward-1 : 原始的reward
+       reward-2 : dis = mean(dis_from_good) - mean(dis_from_bad) 的改变量
+     # 最终环境名:
+       WaterWorld-v0                                    # 原始gym提供的reward的环境
+       WaterWorldRAM-v0-reward-0                        # getGameState() + [reward-1, reward-2]
+       WaterWorldRAM-v0-reward-1                        # getGameState() + reward-1
+       WaterWorldRAM-v0-reward-2                        # getGameState() + reward-2
+       WaterWorldImage-v0-reward-0                      # image (48, 48, 3) + [reward-1, reward-2]
+       WaterWorldImage-v0-reward-1                      # image (48, 48, 3) + reward-1
+       WaterWorldImage-v0-reward-2                      # image (48, 48, 3) + reward-2
 

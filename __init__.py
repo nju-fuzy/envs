@@ -1,5 +1,42 @@
 from gym.envs.registration import registry, register, make, spec
 
+#####################################################
+#PyGame
+#####################################################
+# Pygame
+# ----------------------------------------
+for game in ['Catcher', 'MonsterKong', 'FlappyBird', 'PixelCopter', 'PuckWorld', 'RaycastMaze', 'Snake', 'WaterWorld']:
+    nondeterministic = False
+    register(
+        id='{}-v0'.format(game),
+        entry_point='gym.envs.gym_ple:PLEEnv',
+        kwargs={'game_name': game, 'display_screen':False},
+        tags={'wrapper_config.TimeLimit.max_episode_steps': 10000},
+        nondeterministic=nondeterministic,
+    )
+#####################################################
+#####################################################
+
+
+#####################################################
+#####################################################
+# PyGame with new reward type
+for game in ["catcher", "flappy_bird", "water_world"]:
+    name = ''.join([g.capitalize() for g in game.split('_')])
+    reward_type_nums = 2
+
+    for obs_type in ['RAM', 'Image']:
+        for rt in range(0, reward_type_nums + 1):
+            register(
+                id='{}{}-v0-reward-{}'.format(name, obs_type, rt),
+                entry_point='gym.envs.gym_ple:PLE{}Env'.format(name),
+                kwargs={'game_name': name, 'display_screen': False, 'reward_type' : rt, "obs_type" : obs_type},
+                tags={'wrapper_config.TimeLimit.max_episode_steps': 10000},
+                nondeterministic=nondeterministic,
+            )
+#####################################################
+#####################################################
+
 # Algorithmic
 # ----------------------------------------
 
