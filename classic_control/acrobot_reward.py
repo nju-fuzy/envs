@@ -104,10 +104,17 @@ class AcrobotRewardEnv(core.Env):
         self.state = None
         self.seed()
 
-        ################################
+        ###########################################
         self.obs_type = obs_type
         self.reward_type = reward_type
-        ################################
+        # change observation space:
+        if self.obs_type == "Image":
+            self.img_width = 84
+            self.img_height = 84
+            self.img_shape = (self.img_width, self.img_height, 3)
+            self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
+        ###########################################
+
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -115,7 +122,15 @@ class AcrobotRewardEnv(core.Env):
 
     def reset(self):
         self.state = self.np_random.uniform(low=-0.1, high=0.1, size=(4,))
-        return self._get_ob()
+
+        ############################################################
+        if self.obs_type == "Image":
+            initial_obs = np.zeros(self.img_shape, dtype = np.uint8)
+        elif self.obs_type == "RAM":
+            initial_obs = self._get_ob()
+        ############################################################
+
+        return initial_obs
 
     def step(self, a):
         s = self.state
@@ -167,7 +182,7 @@ class AcrobotRewardEnv(core.Env):
         if self.reward_type == 0:
             reward1 = reward
             reward2 = self.get_reward(old_s, ns, terminal, 2)
-            reward = [reward1, reward2]
+            reward = np.array([reward1, reward2])
         ########################################
 
         ########################################
@@ -180,8 +195,8 @@ class AcrobotRewardEnv(core.Env):
             # obs with shape (400, 600, 3)
             # reshape to (160, 210, 3) and swap w-axis and h-axis
             img = Image.fromarray(obs)
-            img = img.resize((160, 210), Image.ANTIALIAS)
-            obs = np.array(img)
+            img = img.resize((self.img_width, self.img_height), Image.ANTIALIAS)
+            obs = np.array(img).astype(np.uint8)
             #obs = np.swapaxes(obs, 0, 1)
         elif self.obs_type == 'RAM':
             obs = self._get_ob()

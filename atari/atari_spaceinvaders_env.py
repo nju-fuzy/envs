@@ -98,7 +98,7 @@ class AtariSpaceInvadersEnv(gym.Env, utils.EzPickle):
         if self.reward_type == 0:
             reward1 = reward
             reward2 = self.get_reward(pre_lives, now_lives, done, 2)
-            reward = [reward1, reward2]
+            reward = np.array([reward1, reward2])
         ############################################################
 
         return ob, reward, self.ale.game_over(), {"ale.lives": self.ale.lives()}

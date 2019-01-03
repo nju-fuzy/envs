@@ -98,6 +98,13 @@ class CartPoleRewardEnv(gym.Env):
         ############################################
         self.obs_type = obs_type
         self.reward_type = reward_type
+
+        # change observation space:
+        if self.obs_type == "Image":
+            self.img_width = 84
+            self.img_height = 84
+            self.img_shape = (self.img_width, self.img_height, 3)
+            self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
         ############################################
 
     def seed(self, seed=None):
@@ -163,7 +170,7 @@ class CartPoleRewardEnv(gym.Env):
             reward1 = reward
             reward2 = self.get_reward(x, old_x, theta, old_theta, done, 2)
             reward3 = self.get_reward(x, old_x, theta, old_theta, done, 3)
-            reward = [reward1, reward2, reward3]
+            reward = np.array([reward1, reward2, reward3])
         ############################################################
 
         ############################################################
@@ -182,8 +189,8 @@ class CartPoleRewardEnv(gym.Env):
             # obs with shape (400, 600, 3)
             # reshape to (160, 210, 3) and swap w-axis and h-axis
             img = Image.fromarray(obs)
-            img = img.resize((160, 210), Image.ANTIALIAS)
-            obs = np.array(img)
+            img = img.resize((self.img_width, self.img_height), Image.ANTIALIAS)
+            obs = np.array(img).astype(np.uint8)
             #obs = np.swapaxes(obs, 0, 1)
         elif self.obs_type == 'RAM':
             obs = np.array(self.state)
@@ -194,7 +201,15 @@ class CartPoleRewardEnv(gym.Env):
     def reset(self):
         self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(4,))
         self.steps_beyond_done = None
-        return np.array(self.state)
+
+        ############################################################
+        if self.obs_type == "Image":
+            initial_obs = np.zeros(self.img_shape, dtype = np.uint8)
+        elif self.obs_type == "RAM":
+            initial_obs = np.array(self.state)
+        ############################################################
+
+        return initial_obs
 
     ###########################################
     # get reward

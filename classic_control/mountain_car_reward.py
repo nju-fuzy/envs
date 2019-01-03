@@ -45,13 +45,19 @@ class MountainCarRewardEnv(gym.Env):
         self.action_space = spaces.Discrete(3)
         self.observation_space = spaces.Box(self.low, self.high)
 
-        self.seed()
-        self.reset()
-
         ###########################################
         self.obs_type = obs_type
         self.reward_type = reward_type
+        # change observation space:
+        if self.obs_type == "Image":
+            self.img_width = 84
+            self.img_height = 84
+            self.img_shape = (self.img_width, self.img_height, 3)
+            self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
         ###########################################
+
+        self.seed()
+        self.reset()
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -104,7 +110,7 @@ class MountainCarRewardEnv(gym.Env):
             reward3 = self.get_reward(position, old_position, velocity, old_velocity, done, 3)
             reward4 = self.get_reward(position, old_position, velocity, old_velocity, done, 4)
             reward5 = self.get_reward(position, old_position, velocity, old_velocity, done, 5)
-            reward = [reward1, reward2, reward3, reward4, reward5]
+            reward = np.array([reward1, reward2, reward3, reward4, reward5])
         ################################################
 
         ################################################
@@ -117,8 +123,8 @@ class MountainCarRewardEnv(gym.Env):
             # obs with shape (400, 600, 3)
             # reshape to (160, 210, 3) and swap w-axis and h-axis
             img = Image.fromarray(obs)
-            img = img.resize((160, 210), Image.ANTIALIAS)
-            obs = np.array(img)
+            img = img.resize((self.img_width, self.img_height), Image.ANTIALIAS)
+            obs = np.array(img).astype(np.uint8)
             #obs = np.swapaxes(obs, 0, 1)
         elif self.obs_type == 'RAM':
             obs = np.array(self.state)
@@ -128,7 +134,15 @@ class MountainCarRewardEnv(gym.Env):
 
     def reset(self):
         self.state = np.array([self.np_random.uniform(low=-0.6, high=-0.4), 0])
-        return np.array(self.state)
+
+        ############################################################
+        if self.obs_type == "Image":
+            initial_obs = np.zeros(self.img_shape, dtype = np.uint8)
+        elif self.obs_type == "RAM":
+            initial_obs = np.array(self.state)
+        ############################################################
+
+        return initial_obs
 
     def _height(self, xs):
         return np.sin(3 * xs)*.45+.55

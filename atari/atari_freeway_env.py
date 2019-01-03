@@ -111,7 +111,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         if self.reward_type == 0:
             reward1 = reward
             reward2 = self.get_reward(ob, pre_ob, done, 2)
-            reward = [reward1, reward2]
+            reward = np.array([reward1, reward2])
         ############################################################
 
         return ob, reward, done, {"ale.lives": self.ale.lives()}

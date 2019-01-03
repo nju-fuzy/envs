@@ -607,7 +607,7 @@ for game in ["freeway"]:
 #########
 for game in ["atlantis", "space_invaders"]:
     name = ''.join([g.capitalize() for g in game.split('_')])
-    reward_type_nums = 2
+    reward_type_nums = 3
 
     for rt in range(0, reward_type_nums + 1):
         nondeterministic = False

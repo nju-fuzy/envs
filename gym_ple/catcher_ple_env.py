@@ -4,6 +4,10 @@ from gym import spaces
 from ple import PLE
 import numpy as np
 
+#################################
+from PIL import Image
+#################################
+
 class PLECatcherEnv(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
@@ -47,10 +51,20 @@ class PLECatcherEnv(gym.Env):
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.screen_width, self.screen_height, 3), dtype = np.uint8)
         self.viewer = None
 
-        ##################################################################
+        ############################################
         self.obs_type = obs_type
         self.reward_type = reward_type
-        ##################################################################
+
+        # change observation space:
+        if self.obs_type == "Image":
+            self.img_width = 84
+            self.img_height = 84
+            self.img_shape = (self.img_width, self.img_height, 3)
+            self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
+        elif self.obs_type == "RAM":
+            self.observation_space = spaces.Box(low = -100.0, high = 100.0, shape = (4, ), dtype = np.float32)
+        ############################################
+
 
     #############################################
     # Add state processer
@@ -65,7 +79,13 @@ class PLECatcherEnv(gym.Env):
         #############################################
 
         reward = self.game_state.act(self._action_set[a])
-        state = self._get_image()
+
+        #############################################
+        #state = self._get_image()
+        if self.obs_type == "Image":
+            state = self._get_image()
+        #############################################
+
         terminal = self.game_state.game_over()
 
         #############################################
@@ -82,13 +102,14 @@ class PLECatcherEnv(gym.Env):
         if self.reward_type == 0:
             reward1 = reward
             reward2 = self.get_reward(old_ram, ram, terminal, 2)
-            reward = [reward1, reward2]
+            reward = np.array([reward1, reward2])
         ##############################################
 
         ##############################################
         # obs
         if self.obs_type == "RAM":
             state = self.game_state.getGameState()
+            state = np.array(list(state[0]))
         ##############################################
 
         return state, reward, terminal, {}
@@ -118,7 +139,13 @@ class PLECatcherEnv(gym.Env):
 
     def _get_image(self):
         image_rotated = np.fliplr(np.rot90(self.game_state.getScreenRGB(),3)) # Hack to fix the rotated image returned by ple
-        return image_rotated
+        ##########################################
+        # resize image
+        img = Image.fromarray(image_rotated)
+        img = img.resize((self.img_width, self.img_height), Image.ANTIALIAS)
+        image_resized = np.array(img).astype(np.uint8)
+        ##########################################
+        return image_resized
 
     @property
     def _n_actions(self):
@@ -128,7 +155,13 @@ class PLECatcherEnv(gym.Env):
     def _reset(self):
         self.observation_space = spaces.Box(low=0, high=255, shape=(self.screen_width, self.screen_height, 3), dtype = np.uint8)
         self.game_state.reset_game()
-        state = self._get_image()
+        #######################################
+        if self.obs_type == "Image":
+            state = self._get_image()
+        elif self.obs_type == "RAM":
+            state = self.game_state.getGameState()
+            state = np.array(list(state[0]))
+        #######################################
         return state
 
     def _render(self, mode='human', close=False):

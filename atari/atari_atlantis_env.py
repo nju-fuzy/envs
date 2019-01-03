@@ -95,10 +95,14 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
         if self.reward_type == 2:
             reward = self.get_reward(pre_lives, now_lives, done, 2)
 
+        if self.reward_type == 3:
+            reward = self.get_reward(pre_lives, now_lives, done, 3)
+
         if self.reward_type == 0:
             reward1 = reward
             reward2 = self.get_reward(pre_lives, now_lives, done, 2)
-            reward = [reward1, reward2]
+            reward3 = self.get_reward(pre_lives, now_lives, done, 3)
+            reward = np.array([reward1, reward2, reward3])
         ############################################################
 
         return ob, reward, self.ale.game_over(), {"ale.lives": self.ale.lives()}
@@ -113,11 +117,12 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
         if not done:
             if reward_type == 2:
                 reward = 0.1
+            elif reward_type == 3:
                 lost_lives = pre_lives - now_lives
                 if lost_lives > 0:
                     reward = -5.0 * lost_lives
                 if now_lives == 6 and pre_lives == 0:
-                    reward = 0.0
+                    reward = 0
         return reward
     #############################################
 
