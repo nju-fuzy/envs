@@ -100,8 +100,8 @@ for game in ["cart_pole"]:
                 id='CartPole{}-v0-reward-{}'.format(obs_type, rt),
                 entry_point='gym.envs.classic_control:CartPoleRewardEnv',
                 kwargs={'reward_type' : rt, "obs_type" : obs_type},
-                max_episode_steps=200,
-                reward_threshold=195.0,
+                max_episode_steps=1000,
+                reward_threshold=999.0,
             )
 
             register(
@@ -126,8 +126,8 @@ for game in ["mountain_car"]:
                 id='{}{}-v0-reward-{}'.format(name, obs_type, rt),
                 entry_point='gym.envs.classic_control:{}RewardEnv'.format(name),
                 kwargs={'reward_type' : rt, "obs_type" : obs_type},
-                max_episode_steps=200,
-                reward_threshold=110.0,
+                max_episode_steps=1000,
+                reward_threshold=1000.0,
             )
 ####################################################
 

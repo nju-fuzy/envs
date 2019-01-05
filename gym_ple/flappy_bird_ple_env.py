@@ -58,11 +58,14 @@ class PLEFlappyBirdEnv(gym.Env):
         self.obs_type = obs_type
         self.reward_type = reward_type
 
+        # every reward type's max-abs value
+        self.rewards_ths = [5.0, 10.0]
+
         # change observation space:
+        self.img_width = 84
+        self.img_height = 84
+        self.img_shape = (self.img_width, self.img_height, 3)
         if self.obs_type == "Image":
-            self.img_width = 84
-            self.img_height = 84
-            self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
         elif self.obs_type == "RAM":
             self.observation_space = spaces.Box(low = -100.0, high = 100.0, shape = (8, ), dtype = np.float32)
@@ -107,6 +110,15 @@ class PLEFlappyBirdEnv(gym.Env):
             reward = np.array([reward1, reward2])
         ##############################################
 
+        ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
+
         ##############################################
         # obs
         if self.obs_type == "RAM":
@@ -135,7 +147,7 @@ class PLEFlappyBirdEnv(gym.Env):
                 py, top_y, bottom_y = ram[0], ram[3], ram[4]
                 old_dis = abs(old_py - (old_top_y + old_bottom_y) / 2.0)
                 dis = abs(py - (top_y + bottom_y) / 2.0)
-                reward = 0.1 * (old_dis - dis)
+                reward = old_dis - dis
         return reward
     #############################################
     #############################################

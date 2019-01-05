@@ -16,6 +16,9 @@
        FreewayNoFrameskip-v0-reward-0      # np.array([reward-1, reward-2])
        FreewayNoFrameskip-v0-reward-1      # 原始reward
        FreewayNoFrameskip-v0-reward-2      # 自己修改reward得到的环境
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = 0.0, max = 1.0, max-abs = 1.0
+       reward-2 : min = -10.0, max = 10.0, max-abs = 10.0
 
   ## Atlantis
      # 新增文件: envs/atari/atari_atlantis_env.py
@@ -24,14 +27,18 @@
      # 新增reward类型:
        reward-0 : np.array([reward-1, reward-2, reward-3])
        reward-1 : 原始的reward
-       reward-2 : 每走一步得0.1分
-       reward-3 : 丢失掉一条命的话失掉5分
+       reward-2 : 每走一步得1分
+       reward-3 : 丢失掉一条命-1分
      # 最终环境名:
        AtlantisNoFrameskip-v0               # 原始gym提供的reward的环境
        AtlantisNoFrameskip-v0-reward-0      # np.array([reward-1, reward-2])
        AtlantisNoFrameskip-v0-reward-1      # 原始的reward
        AtlantisNoFrameskip-v0-reward-2      # (210, 160, 3) + reward-2
        AtlantisNoFrameskip-v0-reward-3      # reward-3
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = 0.0, max = 5000.0, max-abs = 5000.0
+       reward-2 : min = 0.0, max = 1.0, max-abs = 1.0
+       reward-3 : min = -5.0, max = 0.0, max-abs = 5.0
 
   ## SpaceInvaders
      # 新增文件: envs/atari/atari_spaceinvaders_env.py
@@ -40,12 +47,16 @@
      # 新增reward类型:
        reward-0 : np.array([reward-1, reward-2])
        reward-1 : 原始的reward
-       reward-2 : 每走一步得0.1分,丢失掉一条命的话失掉5分
+       reward-2 : 每走一步得1分,丢失掉一条命的话-5分
      # 最终环境名:
        SpaceInvadersNoFrameskip-v0               # 原始gym提供的reward的环境
        SpaceInvadersNoFrameskip-v0-reward-0      # np.array([reward-1, reward-2])
        SpaceInvadersNoFrameskip-v0-reward-1      # 原始的reward
        SpaceInvadersNoFrameskip-v0-reward-2      # 自己修改reward得到的环境
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = 0.0, max = 30.0, max-abs = 30.0
+       reward-2 : min = -5.0, max = 1.0, max-abs = 5.0
+
   ## PS:
      # 为了使得新增的环境名得到注册,需要修改部分envs/registration.py文件
      # 在envs/__init__.py里面注册了很多可用的环境名，比如:
@@ -81,10 +92,10 @@
        CartPoleImage-v0-reward-1            # image (84, 84, 3) + reward-1
        CartPoleImage-v0-reward-2            # image (84, 84, 3) + reward-2
        CartPoleImage-v0-reward-3            # image (84, 84, 3) + reward-3
-
-     # PS:
-       # 自己定义的CartPole要指定使用RAM还是Image，使用RAM的话是默认返回四元组
-         Image是对图像从(400, 600, 3) resize 到 (160, 210, 3) 再转置
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = 0.0, max = 1.0, max-abs = 1.0
+       reward-2 : min = -0.05, max = 0.05, max-abs = 0.05
+       reward-3 : min = -0.1, max = 0.1, max-abs = 0.1
 
   ## MountainCar
      # 新增文件: envs/classic_control/mountain_car_reward.py
@@ -93,7 +104,7 @@
      # 新增reward类型:
        reward-0 : np.array([reward-1,...,reward-5])
        reward-1 : 原始的reward，到终点获得得分
-       reward-2 : 能量, gh + 0.5 * v * v
+       reward-2 : 能量, gh + 0.5 * v * v, 当g=9.8时，二者量级差不多
        reward-3 : 距离终点距离
        reward-4 : 速度
        reward-5 : 高度
@@ -111,6 +122,12 @@
        MountainCarImage-v0-reward-3            # image (84, 84, 3) + reward-3
        MountainCarImage-v0-reward-4            # image (84, 84, 3) + reward-4
        MountainCarImage-v0-reward-5            # image (84, 84, 3) + reward-5
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = -1.0, max = 0.0, max-abs = 1.0
+       reward-2 : min = -0.8, max = 0.8, max-abs = 0.8
+       reward-3 : min = -0.09, max = 0.09, max-abs = 0.09
+       reward-4 : min = -0.01, max = 0.01, max-abs = 0.01
+       reward-5 : min = -0.1, max = 0.1, max-abs = 0.1
 
   ## Acrobot
      # 新增文件: envs/classic_control/acrobot_reward.py
@@ -123,11 +140,14 @@
      # 最终环境名:
        Acrobot-v1                          # 原始gym提供的reward的环境
        AcrobotRAM-v1-reward-0              # (cos(t1), sin(t1), cos(t2), sin(t2), t1_dot, t2_dot) + np.array([reward-1, reward-2])
-       AcrobotRAM-v1-reward-0              # (cos(t1), sin(t1), cos(t2), sin(t2), t1_dot, t2_dot) + reward-1
-       AcrobotRAM-v1-reward-0              # (cos(t1), sin(t1), cos(t2), sin(t2), t1_dot, t2_dot) + reward-2
+       AcrobotRAM-v1-reward-1              # (cos(t1), sin(t1), cos(t2), sin(t2), t1_dot, t2_dot) + reward-1
+       AcrobotRAM-v1-reward-2              # (cos(t1), sin(t1), cos(t2), sin(t2), t1_dot, t2_dot) + reward-2
        AcrobotImage-v1-reward-0            # image (84, 84, 3) + np.array([reward-1, reward-2])
        AcrobotImage-v1-reward-1            # image (84, 84, 3) + reward-1
        AcrobotImage-v1-reward-2            # image (84, 84, 3) + reward-2
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = -1.0, max = 0.0, max-abs = 1.0
+       reward-2 : min = -2.0, max = 2.0, max-abs = 2.0
 
 
 #### PLE environment(PyGame Learning Environment)
@@ -195,9 +215,12 @@
        CatcherRAM-v0-reward-0                        # getGameState() + np.array([reward-1, reward-2])
        CatcherRAM-v0-reward-1                        # getGameState() + reward-1
        CatcherRAM-v0-reward-2                        # getGameState() + reward-2
-       CatcherImage-v0-reward-0                      # image (64, 64, 3) + np.array([reward-1, reward-2])
-       CatcherImage-v0-reward-1                      # image (64, 64, 3) + reward-1
-       CatcherImage-v0-reward-2                      # image (64, 64, 3) + reward-2
+       CatcherImage-v0-reward-0                      # image (84, 84, 3) + np.array([reward-1, reward-2])
+       CatcherImage-v0-reward-1                      # image (84, 84, 3) + reward-1
+       CatcherImage-v0-reward-2                      # image (84, 84, 3) + reward-2
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = -1.0, max = 1.0, max-abs = 1.0
+       reward-2 : min = -2.0, max = 2.0, max-abs = 2.0
 
   ## FlappyBird
      # 新增文件: envs/gym_ple/flappy_bird_ple_env.py
@@ -212,9 +235,12 @@
        FlappyBirdRAM-v0-reward-0                        # getGameState() + np.array([reward-1, reward-2])
        FlappyBirdRAM-v0-reward-1                        # getGameState() + reward-1
        FlappyBirdRAM-v0-reward-2                        # getGameState() + reward-2
-       FlappyBirdImage-v0-reward-0                      # image (500, 288, 3) + np.array([reward-1, reward-2])
-       FlappyBirdImage-v0-reward-1                      # image (500, 288, 3) + reward-1
-       FlappyBirdImage-v0-reward-2                      # image (500, 288, 3) + reward-2
+       FlappyBirdImage-v0-reward-0                      # image (84, 84, 3) + np.array([reward-1, reward-2])
+       FlappyBirdImage-v0-reward-1                      # image (84, 84, 3) + reward-1
+       FlappyBirdImage-v0-reward-2                      # image (84, 84, 3) + reward-2
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = -5.0, max = 1.0, max-abs = 5.0
+       reward-2 : min = -10.0, max = 10.0, max-abs = 10.0
 
   ## WaterWorld
      # 新增文件: envs/gym_ple/water_world_ple_env.py
@@ -226,9 +252,12 @@
        reward-2 : dis = mean(dis_from_good) - mean(dis_from_bad) 的改变量
      # 最终环境名:
        WaterWorld-v0                                    # 原始gym提供的reward的环境
-       WaterWorldImage-v0-reward-0                      # image (48, 48, 3) + np.array([reward-1, reward-2])
-       WaterWorldImage-v0-reward-1                      # image (48, 48, 3) + reward-1
-       WaterWorldImage-v0-reward-2                      # image (48, 48, 3) + reward-2
+       WaterWorldImage-v0-reward-0                      # image (84, 84, 3) + np.array([reward-1, reward-2])
+       WaterWorldImage-v0-reward-1                      # image (84, 84, 3) + reward-1
+       WaterWorldImage-v0-reward-2                      # image (84, 84, 3) + reward-2
+     # Reward scaling: Normalize divide by max-abs value
+       reward-1 : min = -1.0, max = 10, max-abs = 10
+       reward-2 : min = -5.0, max = 5.0, max-abs = 5.0
 
      # PS:
        不提供RAM状态

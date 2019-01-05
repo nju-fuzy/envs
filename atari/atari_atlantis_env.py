@@ -57,6 +57,9 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
 
         #########################################
         self.reward_type = reward_type
+
+        # every reward type's max-abs value
+        self.rewards_ths = [5000.0, 1.0, 5.0]
         #########################################
 
 
@@ -105,6 +108,15 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
             reward = np.array([reward1, reward2, reward3])
         ############################################################
 
+        ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
+
         return ob, reward, self.ale.game_over(), {"ale.lives": self.ale.lives()}
 
     #############################################
@@ -116,13 +128,13 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
         reward = 0.0
         if not done:
             if reward_type == 2:
-                reward = 0.1
+                reward = 1.0
             elif reward_type == 3:
                 lost_lives = pre_lives - now_lives
                 if lost_lives > 0:
                     reward = -5.0 * lost_lives
                 if now_lives == 6 and pre_lives == 0:
-                    reward = 0
+                    reward = 0.0
         return reward
     #############################################
 

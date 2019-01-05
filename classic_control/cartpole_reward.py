@@ -99,6 +99,9 @@ class CartPoleRewardEnv(gym.Env):
         self.obs_type = obs_type
         self.reward_type = reward_type
 
+        # every reward type's max-abs values
+        self.rewards_ths = [1.0, 0.05, 0.1]
+
         # change observation space:
         if self.obs_type == "Image":
             self.img_width = 84
@@ -174,6 +177,15 @@ class CartPoleRewardEnv(gym.Env):
         ############################################################
 
         ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
+
+        ############################################################
         # init viewer
         if self.viewer is None:
             self.init_viewer(visible = False)
@@ -227,13 +239,13 @@ class CartPoleRewardEnv(gym.Env):
         if not done:
             if reward_type == 2:
                 # position offset
-                pos_offset = abs(x) / self.x_threshold
-                old_pos_offset = abs(old_x) / self.x_threshold
+                pos_offset = abs(x)
+                old_pos_offset = abs(old_x)
                 reward = old_pos_offset - pos_offset
             elif reward_type == 3:
                 # angle offset
-                angle_offset = abs(theta) / self.theta_threshold_radians
-                old_angle_offset = abs(old_theta) / self.theta_threshold_radians
+                angle_offset = abs(theta)
+                old_angle_offset = abs(old_theta)
                 reward = old_angle_offset - angle_offset
 
         return reward

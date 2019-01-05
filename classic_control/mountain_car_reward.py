@@ -48,6 +48,10 @@ class MountainCarRewardEnv(gym.Env):
         ###########################################
         self.obs_type = obs_type
         self.reward_type = reward_type
+
+        # every reward type's max-abs value
+        self.rewards_ths = [1.0, 0.8, 0.09, 0.01, 0.1]
+
         # change observation space:
         if self.obs_type == "Image":
             self.img_width = 84
@@ -113,6 +117,15 @@ class MountainCarRewardEnv(gym.Env):
             reward = np.array([reward1, reward2, reward3, reward4, reward5])
         ################################################
 
+        ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
+
         ################################################
         # observation is image or ram
         # image is numpy.array with shape (400, 600, 3)
@@ -162,7 +175,7 @@ class MountainCarRewardEnv(gym.Env):
                 reward = energy - old_energy
             # distance from goal_position
             if reward_type == 3:
-                reward = (position - old_position) / (self.max_position - self.min_position)
+                reward = position - old_position
             # velocity
             if reward_type == 4:
                 reward = velocity - old_velocity

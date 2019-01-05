@@ -107,6 +107,10 @@ class AcrobotRewardEnv(core.Env):
         ###########################################
         self.obs_type = obs_type
         self.reward_type = reward_type
+
+        # every reward type's max-abs value
+        self.rewards_ths = [1.0, 2.0]
+
         # change observation space:
         if self.obs_type == "Image":
             self.img_width = 84
@@ -184,6 +188,15 @@ class AcrobotRewardEnv(core.Env):
             reward2 = self.get_reward(old_s, ns, terminal, 2)
             reward = np.array([reward1, reward2])
         ########################################
+
+        ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
 
         ########################################
         # observation is image or ram

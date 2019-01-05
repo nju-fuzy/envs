@@ -57,11 +57,14 @@ class PLEWaterWorldEnv(gym.Env):
         self.obs_type = obs_type
         self.reward_type = reward_type
 
+        # every reward type's max-abs value
+        self.rewards_ths = [10.0, 5.0]
+
         # change observation space:
+        self.img_width = 84
+        self.img_height = 84
+        self.img_shape = (self.img_width, self.img_height, 3)
         if self.obs_type == "Image":
-            self.img_width = 84
-            self.img_height = 84
-            self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
         else:
             print("Water world only supports image observation!")
@@ -101,6 +104,15 @@ class PLEWaterWorldEnv(gym.Env):
             reward = np.array([reward1, reward2])
         ##############################################
 
+        ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
+
         return state, reward, terminal, {}
 
     #############################################
@@ -123,8 +135,13 @@ class PLEWaterWorldEnv(gym.Env):
                 goods = np.array(ram[4]["GOOD"])
                 bads = np.array(ram[4]["BAD"])
 
-                old_sum_dis = np.mean(old_goods) - np.mean(old_bads)
-                sum_dis = np.mean(goods) - np.mean(bads)
+                mean_old_goods = np.mean(old_goods) if len(old_goods) > 0 else 0.0
+                mean_old_bads = np.mean(old_bads) if len(old_bads) > 0 else 0.0
+                mean_goods = np.mean(goods) if len(goods) > 0 else 0.0
+                mean_bads = np.mean(bads) if len(bads) > 0 else 0.0
+
+                old_sum_dis = mean_old_goods - mean_old_bads
+                sum_dis = mean_goods - mean_bads
                 reward = old_sum_dis - sum_dis
 
                 if reward > 5.0:

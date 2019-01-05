@@ -68,7 +68,11 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
 
         #########################################
         self.reward_type = reward_type
-        #self.chicken_img = cv2.imread(CHICKEN_IMAGE_PATH)
+
+        # every reward type's max-abs value
+        # reward type 1 : max-abs = 1.0
+        # reward type 2 : max-abs = 10.0
+        self.rewards_ths = [1.0, 10.0]
         #########################################
 
 
@@ -114,6 +118,15 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
             reward = np.array([reward1, reward2])
         ############################################################
 
+        ############################################################
+        # reward scaling
+        if self.reward_type == 0:
+            for rt in range(len(reward)):
+                reward[rt] = reward[rt] / self.rewards_ths[rt]
+        else:
+            reward = reward / self.rewards_ths[self.reward_type - 1]
+        ############################################################
+
         return ob, reward, done, {"ale.lives": self.ale.lives()}
 
 
@@ -133,7 +146,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         height = self.get_height(ob)
         move = height - pre_height
 
-        if done or abs(move) > 100.0:
+        if done or abs(move) > 10.0:
             move = 0.0
         return move
 
