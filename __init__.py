@@ -118,14 +118,10 @@ for game in ["cart_pole"]:
 ####################################################
 for game in ["mountain_car"]:
     name = ''.join([g.capitalize() for g in game.split('_')])
-    reward_type_nums = 5
+    reward_type_nums = 4
 
     for obs_type in ['RAM', 'Image']:
         for rt in range(0, reward_type_nums + 1):
-            # remove energy reward
-            if rt == 2:
-                continue
-
             register(
                 id='{}{}-v0-reward-{}'.format(name, obs_type, rt),
                 entry_point='gym.envs.classic_control:{}RewardEnv'.format(name),

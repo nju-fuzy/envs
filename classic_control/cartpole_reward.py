@@ -100,7 +100,8 @@ class CartPoleRewardEnv(gym.Env):
         self.reward_type = reward_type
 
         # every reward type's max-abs values
-        self.rewards_ths = [1.0, 0.05, 0.1]
+        # self.rewards_ths = [1.0, 0.05, 0.1]
+        self.rewards_ths = [1.0, 1.0, 0.1]
 
         # change observation space:
         if self.obs_type == "Image":
@@ -229,7 +230,8 @@ class CartPoleRewardEnv(gym.Env):
     def get_reward(self, x, old_x, theta, old_theta, done, reward_type, gamma = 0.99):
         ''' Get reward : 
             reward_type = 2:
-                position_offset - old_positon_offset
+                # position_offset - old_positon_offset
+                1 - abs(position_offset) / max_offset
             reward_type = 3:
                 angle_offset - old_angle_offset
             done:
@@ -238,10 +240,14 @@ class CartPoleRewardEnv(gym.Env):
         reward = 0.0
         if not done:
             if reward_type == 2:
+                '''
                 # position offset
                 pos_offset = abs(x)
                 old_pos_offset = abs(old_x)
                 reward = old_pos_offset - gamma * pos_offset
+                '''
+                pos_offset = abs(x)
+                reward = 1.0 - pos_offset / self.x_threshold
             elif reward_type == 3:
                 # angle offset
                 angle_offset = abs(theta)
