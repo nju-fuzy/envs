@@ -87,7 +87,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         self.ale.loadROM(self.game_path)
         return [seed1, seed2]
 
-    def step(self, a):
+    def step(self, a, gamma = 0.99):
         reward = 0.0
         action = self._action_set[a]
 
@@ -110,11 +110,11 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
 
         # reward_type = 2 : height change
         if self.reward_type == 2:
-            reward = self.get_reward(ob, pre_ob, done, self.reward_type)
+            reward = self.get_reward(ob, pre_ob, done, self.reward_type, gamma = gamma)
 
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(ob, pre_ob, done, 2)
+            reward2 = self.get_reward(ob, pre_ob, done, 2, gamma = gamma)
             reward = np.array([reward1, reward2])
         ############################################################
 
@@ -133,7 +133,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
     ############################################################
     # add self
     ############################################################
-    def get_reward(self, ob, pre_ob, done, reward_type):
+    def get_reward(self, ob, pre_ob, done, reward_type, gamma = 0.99):
         ''' Get reward from images!
         @Params:
             ob : observation at current state, numpy.array shape = (210, 160, 3)
@@ -144,7 +144,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         '''
         pre_height = self.get_height(pre_ob)
         height = self.get_height(ob)
-        move = height - pre_height
+        move = gamma * height - pre_height
 
         if done or abs(move) > 10.0:
             move = 0.0

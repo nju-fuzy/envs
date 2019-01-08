@@ -49,6 +49,9 @@ class MountainCarRewardEnv(gym.Env):
         self.obs_type = obs_type
         self.reward_type = reward_type
 
+        # all possible reward-type except reawrd1, that is source reward
+        self.rewards_type_list = [3, 4, 5]
+
         # every reward type's max-abs value
         self.rewards_ths = [1.0, 0.8, 0.09, 0.01, 0.1]
 
@@ -67,7 +70,7 @@ class MountainCarRewardEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def step(self, action):
+    def step(self, action, gamma = 0.99):
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
 
         position, velocity = self.state
@@ -96,25 +99,25 @@ class MountainCarRewardEnv(gym.Env):
         ################################################
         # energy
         if self.reward_type == 2:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 2)
+            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 2, gamma)
         # distance from goal_position
         if self.reward_type == 3:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 3)
+            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 3, gamma)
         # velocity
         if self.reward_type == 4:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 4)
+            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 4, gamma)
         # height
         if self.reward_type == 5:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5)
+            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5, gamma)
 
         # reward type 0 : all list of reward
         if self.reward_type == 0:
-            reward1 = reward
-            reward2 = self.get_reward(position, old_position, velocity, old_velocity, done, 2)
-            reward3 = self.get_reward(position, old_position, velocity, old_velocity, done, 3)
-            reward4 = self.get_reward(position, old_position, velocity, old_velocity, done, 4)
-            reward5 = self.get_reward(position, old_position, velocity, old_velocity, done, 5)
-            reward = np.array([reward1, reward2, reward3, reward4, reward5])
+            rewards = []
+            rewards.append(reward)
+            for rt in self.rewards_type_list:
+                reward_i = self.get_reward(position, old_position, velocity, old_velocity, done, rt, gamma)
+                rewards.append(reward_i)
+            reward = np.array(rewards)
         ################################################
 
         ############################################################
@@ -163,7 +166,7 @@ class MountainCarRewardEnv(gym.Env):
     ###############################################
     # get reward
     ###############################################
-    def get_reward(self, position, old_position, velocity, old_velocity, done, reward_type):
+    def get_reward(self, position, old_position, velocity, old_velocity, done, reward_type, gamma = 0.99):
         ''' Get reward
         '''
         reward = 0.0
@@ -172,16 +175,16 @@ class MountainCarRewardEnv(gym.Env):
             if reward_type == 2:
                 energy = 0.5 * velocity * velocity + 9.8 * self._height(position)
                 old_energy = 0.5 * old_velocity * old_velocity + 9.8 * self._height(old_position)
-                reward = energy - old_energy
+                reward = gamma * energy - old_energy
             # distance from goal_position
             if reward_type == 3:
-                reward = position - old_position
+                reward = gamma * position - old_position
             # velocity
             if reward_type == 4:
-                reward = velocity - old_velocity
+                reward = gamma * velocity - old_velocity
             # height
             if reward_type == 5:
-                reward = self._height(position) - self._height(old_position)
+                reward = gamma * self._height(position) - self._height(old_position)
         return reward
 
     ###############################################

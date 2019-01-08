@@ -77,7 +77,7 @@ class PLEWaterWorldEnv(gym.Env):
         return np.array([state.values()])
     #############################################
 
-    def _step(self, a):
+    def _step(self, a, gamma = 0.99):
         #############################################
         # old observation
         old_ram = self.game_state.getGameState()
@@ -95,12 +95,12 @@ class PLEWaterWorldEnv(gym.Env):
         #############################################
         # reward 2
         if self.reward_type == 2:
-            reward = self.get_reward(old_ram, ram, terminal, 2)
+            reward = self.get_reward(old_ram, ram, terminal, 2, gamma)
 
         # reward 0
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(old_ram, ram, terminal, 2)
+            reward2 = self.get_reward(old_ram, ram, terminal, 2, gamma)
             reward = np.array([reward1, reward2])
         ##############################################
 
@@ -118,7 +118,7 @@ class PLEWaterWorldEnv(gym.Env):
     #############################################
     # Add for reward
     #############################################
-    def get_reward(self, old_ram, ram, done, reward_type):
+    def get_reward(self, old_ram, ram, done, reward_type, gamma = 0.99):
         ''' 
         @Params:
             old_ram, ram : numpy.array, [dict_values([x, y, z, w, {"GOOD" : [], "BAD" : []}])]
@@ -142,7 +142,7 @@ class PLEWaterWorldEnv(gym.Env):
 
                 old_sum_dis = mean_old_goods - mean_old_bads
                 sum_dis = mean_goods - mean_bads
-                reward = old_sum_dis - sum_dis
+                reward = old_sum_dis - gamma * sum_dis
 
                 if reward > 5.0:
                     reward = 5.0

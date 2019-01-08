@@ -114,7 +114,7 @@ class CartPoleRewardEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def step(self, action):
+    def step(self, action, gamma = 0.99):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         state = self.state
         x, x_dot, theta, theta_dot = state
@@ -162,17 +162,17 @@ class CartPoleRewardEnv(gym.Env):
         ############################################################
         # position offset as reward
         if self.reward_type == 2:
-            reward = self.get_reward(x, old_x, theta, old_theta, done, 2)
+            reward = self.get_reward(x, old_x, theta, old_theta, done, 2, gamma)
 
         # angle offset ad reward
         if self.reward_type == 3:
-            reward = self.get_reward(x, old_x, theta, old_theta, done, 3)
+            reward = self.get_reward(x, old_x, theta, old_theta, done, 3, gamma)
 
         # reward 0, return all reward
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(x, old_x, theta, old_theta, done, 2)
-            reward3 = self.get_reward(x, old_x, theta, old_theta, done, 3)
+            reward2 = self.get_reward(x, old_x, theta, old_theta, done, 2, gamma)
+            reward3 = self.get_reward(x, old_x, theta, old_theta, done, 3, gamma)
             reward = np.array([reward1, reward2, reward3])
         ############################################################
 
@@ -226,7 +226,7 @@ class CartPoleRewardEnv(gym.Env):
     ###########################################
     # get reward
     ###########################################
-    def get_reward(self, x, old_x, theta, old_theta, done, reward_type):
+    def get_reward(self, x, old_x, theta, old_theta, done, reward_type, gamma = 0.99):
         ''' Get reward : 
             reward_type = 2:
                 position_offset - old_positon_offset
@@ -241,12 +241,12 @@ class CartPoleRewardEnv(gym.Env):
                 # position offset
                 pos_offset = abs(x)
                 old_pos_offset = abs(old_x)
-                reward = old_pos_offset - pos_offset
+                reward = old_pos_offset - gamma * pos_offset
             elif reward_type == 3:
                 # angle offset
                 angle_offset = abs(theta)
                 old_angle_offset = abs(old_theta)
-                reward = old_angle_offset - angle_offset
+                reward = old_angle_offset - gamma * angle_offset
 
         return reward
 

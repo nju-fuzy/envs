@@ -74,7 +74,7 @@ class AtariSpaceInvadersEnv(gym.Env, utils.EzPickle):
         self.ale.loadROM(self.game_path)
         return [seed1, seed2]
 
-    def step(self, a):
+    def step(self, a, gamma = 0.99):
         reward = 0.0
         action = self._action_set[a]
 
@@ -96,11 +96,11 @@ class AtariSpaceInvadersEnv(gym.Env, utils.EzPickle):
         done = self.ale.game_over()
 
         if self.reward_type == 2:
-            reward = self.get_reward(pre_lives, now_lives, done, 2)
+            reward = self.get_reward(pre_lives, now_lives, done, 2, gamma = gamma)
 
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(pre_lives, now_lives, done, 2)
+            reward2 = self.get_reward(pre_lives, now_lives, done, 2, gamma = gamma)
             reward = np.array([reward1, reward2])
         ############################################################
 
@@ -118,7 +118,7 @@ class AtariSpaceInvadersEnv(gym.Env, utils.EzPickle):
     #############################################
     # get reward
     #############################################
-    def get_reward(self, pre_lives, now_lives, done, reward_type):
+    def get_reward(self, pre_lives, now_lives, done, reward_type, gamma = 0.99):
         # if live reward get 1.0
         # if loss one life, give -5.0 reward
         reward = 0.0

@@ -77,7 +77,7 @@ class PLEFlappyBirdEnv(gym.Env):
         return np.array([state.values()])
     #############################################
 
-    def _step(self, a):
+    def _step(self, a, gamma = 0.99):
         #############################################
         # old observation
         old_ram = self.game_state.getGameState()
@@ -99,15 +99,26 @@ class PLEFlappyBirdEnv(gym.Env):
         #############################################
 
         #############################################
+        pass_pipe = False
+        # pass one pipe
+        if reward == 1.0:
+            pass_pipe = True
+
         # reward 2
         if self.reward_type == 2:
-            reward = self.get_reward(old_ram, ram, terminal, 2)
+            reward = self.get_reward(old_ram, ram, terminal, 2, pass_pipe, gamma)
 
         # reward 0
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(old_ram, ram, terminal, 2)
+            reward2 = self.get_reward(old_ram, ram, terminal, 2, pass_pipe, gamma)
             reward = np.array([reward1, reward2])
+            '''
+            if reward1 > 0.0:
+                print("Pass one pipe:", reward)
+                print("Old ram:", list(old_ram[0]))
+                print("Ram:", list(ram[0]))
+            '''
         ##############################################
 
         ############################################################
@@ -131,7 +142,7 @@ class PLEFlappyBirdEnv(gym.Env):
     #############################################
     # Add for reward
     #############################################
-    def get_reward(self, old_ram, ram, done, reward_type):
+    def get_reward(self, old_ram, ram, done, reward_type, pass_pipe, gamma = 0.99):
         ''' 
         @Params:
             old_ram, ram : numpy.array, [dict_values([x1, x2, ..., x8])]
@@ -141,13 +152,21 @@ class PLEFlappyBirdEnv(gym.Env):
         ram = list(ram[0])
 
         reward = 0.0
-        if not done:
+        if not (done or pass_pipe):
             if reward_type == 2:
+                # distance to middle of two pipes
                 old_py, old_top_y, old_bottom_y = old_ram[0], old_ram[3], old_ram[4]
                 py, top_y, bottom_y = ram[0], ram[3], ram[4]
                 old_dis = abs(old_py - (old_top_y + old_bottom_y) / 2.0)
                 dis = abs(py - (top_y + bottom_y) / 2.0)
-                reward = old_dis - dis
+                reward = old_dis - gamma * dis
+                '''
+                # if pipes changed, reward = 0.0
+                old_next_pipe_distance = old_ram[2]
+                next_pipe_distance = ram[2]
+                print(old_ram, ram)
+                print(old_next_pipe_distance, next_pipe_distance, old_dis, dis, old_top_y, old_bottom_y, top_y, bottom_y, reward)
+                '''
         return reward
     #############################################
     #############################################

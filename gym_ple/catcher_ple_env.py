@@ -75,7 +75,7 @@ class PLECatcherEnv(gym.Env):
         return np.array([state.values()])
     #############################################
 
-    def _step(self, a):
+    def _step(self, a, gamma = 0.99):
         #############################################
         # old observation
         old_ram = self.game_state.getGameState()
@@ -99,12 +99,12 @@ class PLECatcherEnv(gym.Env):
         #############################################
         # reward 2
         if self.reward_type == 2:
-            reward = self.get_reward(old_ram, ram, terminal, 2)
+            reward = self.get_reward(old_ram, ram, terminal, 2, gamma)
 
         # reward 0
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(old_ram, ram, terminal, 2)
+            reward2 = self.get_reward(old_ram, ram, terminal, 2, gamma)
             reward = np.array([reward1, reward2])
         ##############################################
 
@@ -129,7 +129,7 @@ class PLECatcherEnv(gym.Env):
     #############################################
     # Add for reward
     #############################################
-    def get_reward(self, old_ram, ram, done, reward_type):
+    def get_reward(self, old_ram, ram, done, reward_type, gamma):
         ''' 
         @Params:
             old_ram, ram : numpy.array, [dict_values([x, y, z, w])]
@@ -144,7 +144,13 @@ class PLECatcherEnv(gym.Env):
                 px, fx = ram[0], ram[2]
                 old_dis = abs(old_px - old_fx)
                 dis = abs(px - fx)
-                reward = old_dis - dis
+                reward = old_dis - gamma * dis
+
+                # a new epoch
+                old_fy, fy = old_ram[3], ram[3]
+                if old_fy > fy:
+                    reward = 0.0
+
                 reward = min(reward, 2.0)
                 reward = max(reward, -2.0)
         return reward

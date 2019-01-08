@@ -136,7 +136,7 @@ class AcrobotRewardEnv(core.Env):
 
         return initial_obs
 
-    def step(self, a):
+    def step(self, a, gamma = 0.99):
         s = self.state
 
         ##############################
@@ -180,12 +180,12 @@ class AcrobotRewardEnv(core.Env):
         ########################################
         # reward2: height
         if self.reward_type == 2:
-            reward = self.get_reward(old_s, ns, terminal, 2)
+            reward = self.get_reward(old_s, ns, terminal, 2, gamma)
 
         # a list of [reward1, reward2]
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(old_s, ns, terminal, 2)
+            reward2 = self.get_reward(old_s, ns, terminal, 2, gamma)
             reward = np.array([reward1, reward2])
         ########################################
 
@@ -220,7 +220,7 @@ class AcrobotRewardEnv(core.Env):
     ###########################################
     # get reward
     ###########################################
-    def get_reward(self, old_state, state, done, reward_type):
+    def get_reward(self, old_state, state, done, reward_type, gamma = 0.99):
         '''
         @Params:
             old_state : a four tuple with (theta1, theta2, theta1_dot, theta2_dot)
@@ -236,7 +236,7 @@ class AcrobotRewardEnv(core.Env):
                 theta1, theta2 = state[0], state[1]
                 old_height = -1.0 * (self.LINK_LENGTH_1 * np.cos(old_theta1) + self.LINK_LENGTH_2 * np.cos(old_theta2 + old_theta1))
                 height = -1.0 * (self.LINK_LENGTH_1 * np.cos(theta1) + self.LINK_LENGTH_2 * np.cos(theta2 + theta1))
-                reward = height - old_height
+                reward = gamma * height - old_height
         return reward
     ###########################################
 
