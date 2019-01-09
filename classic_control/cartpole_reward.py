@@ -188,7 +188,7 @@ class CartPoleRewardEnv(gym.Env):
 
         ############################################################
         # init viewer
-        if self.viewer is None:
+        if self.viewer is None and self.obs_type == "Image":
             self.init_viewer(visible = False)
         ############################################################
 

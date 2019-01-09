@@ -109,7 +109,7 @@ class AcrobotRewardEnv(core.Env):
         self.reward_type = reward_type
 
         # every reward type's max-abs value
-        self.rewards_ths = [1.0, 2.0]
+        self.rewards_ths = [1.0, 0.2]
 
         # change observation space:
         if self.obs_type == "Image":
@@ -173,7 +173,7 @@ class AcrobotRewardEnv(core.Env):
 
         ########################################
         # init viewer
-        if self.viewer is None:
+        if self.viewer is None and self.obs_type == "Image":
             self.init_viewer(visible = False)
         ########################################
 

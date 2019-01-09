@@ -51,7 +51,7 @@ class MountainCarRewardEnv(gym.Env):
 
         self.rewards_type_list = [2, 3, 4]
         # every reward type's max-abs value
-        self.rewards_ths = [1.0, 0.09, 0.01, 0.1, 0.8]
+        self.rewards_ths = [1.0, 0.05, 0.005, 0.01, 0.8]
 
         # change observation space:
         if self.obs_type == "Image":
@@ -90,7 +90,7 @@ class MountainCarRewardEnv(gym.Env):
 
         ################################################
         # init viewer
-        if self.viewer is None:
+        if self.viewer is None and self.obs_type == "Image":
             self.init_viewer(visible = False)
         ################################################
 

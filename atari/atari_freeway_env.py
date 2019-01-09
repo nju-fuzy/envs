@@ -71,8 +71,8 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
 
         # every reward type's max-abs value
         # reward type 1 : max-abs = 1.0
-        # reward type 2 : max-abs = 10.0
-        self.rewards_ths = [1.0, 10.0]
+        # reward type 2 : max-abs = 5.0
+        self.rewards_ths = [1.0, 5.0]
         #########################################
 
 
@@ -148,6 +148,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
 
         if done or abs(move) > 10.0:
             move = 0.0
+
         return move
 
     def get_height(self, ob):
@@ -170,7 +171,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         for i in range(0, 202):
             ss.append(index_cols[i + 8] + ss[-1] - index_cols[i])
         ss = np.array(ss)
-        height = 210 - np.argmax(ss)
+        height = 202 - np.argmax(ss)
         return height
 
     ############################################################

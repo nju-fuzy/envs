@@ -174,6 +174,16 @@ class PLEFlappyBirdEnv(gym.Env):
     def _get_image(self):
         image_rotated = np.fliplr(np.rot90(self.game_state.getScreenRGB(),3)) # Hack to fix the rotated image returned by ple
 
+        '''
+        try:
+            self.cnt += 1
+        except Exception:
+            self.cnt = 0
+        if self.cnt <= 10000:
+            img = Image.fromarray(image_rotated)
+            img.save("/home/lxcnju/workspace/flappy_bird_images/fb_{}.jpg".format(self.cnt))
+        '''
+
         ##########################################
         # resize image
         img = Image.fromarray(image_rotated)
