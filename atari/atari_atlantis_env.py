@@ -59,7 +59,7 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
         self.reward_type = reward_type
 
         # every reward type's max-abs value
-        self.rewards_ths = [5000.0, 1.0, 5.0]
+        self.rewards_ths = [5000.0, 1.0, 1.0]
         #########################################
 
 
@@ -130,11 +130,12 @@ class AtariAtlantisEnv(gym.Env, utils.EzPickle):
             if reward_type == 2:
                 reward = 1.0
             elif reward_type == 3:
-                lost_lives = pre_lives - now_lives
-                if lost_lives > 0:
-                    reward = -5.0 * lost_lives
+                if pre_lives - now_lives > 0:
+                    reward = -0.2                     # lose one life
+                elif pre_lives - now_lives < 0:
+                    reward = 1.0                      # get one life because score is larger then some threshold
                 if now_lives == 6 and pre_lives == 0:
-                    reward = 0.0
+                    reward = 0.0                      # new episode game
         return reward
     #############################################
 
