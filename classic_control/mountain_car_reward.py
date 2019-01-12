@@ -171,7 +171,7 @@ class MountainCarRewardEnv(gym.Env):
         if not done:
             # distance from goal_position
             if reward_type == 2:
-                reward = gamma * position - old_position
+                reward = old_position - gamma * position
             # velocity
             if reward_type == 3:
                 reward = gamma * velocity - old_velocity
