@@ -116,6 +116,8 @@ class CartPoleRewardEnv(gym.Env):
         return [seed]
 
     def step(self, action, gamma = 0.99):
+        if isinstance(action,np.ndarray):
+            action = action[0]
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         state = self.state
         x, x_dot, theta, theta_dot = state

@@ -137,6 +137,8 @@ class AcrobotRewardEnv(core.Env):
         return initial_obs
 
     def step(self, a, gamma = 0.99):
+        if isinstance(a,np.ndarray):
+            a = a[0]
         s = self.state
 
         ##############################
@@ -236,7 +238,8 @@ class AcrobotRewardEnv(core.Env):
                 theta1, theta2 = state[0], state[1]
                 old_height = -1.0 * (self.LINK_LENGTH_1 * np.cos(old_theta1) + self.LINK_LENGTH_2 * np.cos(old_theta2 + old_theta1))
                 height = -1.0 * (self.LINK_LENGTH_1 * np.cos(theta1) + self.LINK_LENGTH_2 * np.cos(theta2 + theta1))
-                reward = gamma * height - old_height
+                #reward = gamma * height - old_height
+                reward = height
         return reward
     ###########################################
 
