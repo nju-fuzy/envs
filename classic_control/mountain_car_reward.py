@@ -49,9 +49,9 @@ class MountainCarRewardEnv(gym.Env):
         self.obs_type = obs_type
         self.reward_type = reward_type
 
-        self.rewards_type_list = [2, 3, 4]
+        self.rewards_type_list = [2, 3]
         # every reward type's max-abs value
-        self.rewards_ths = [1.0, 0.05, 0.005, 0.01, 0.8]
+        self.rewards_ths = [1.0, 0.005, 0.01]
 
         # change observation space:
         if self.obs_type == "Image":
@@ -98,17 +98,17 @@ class MountainCarRewardEnv(gym.Env):
 
         ################################################
         # distance from goal_position
-        if self.reward_type == 2:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 2, gamma)
+        #if self.reward_type == 2:
+            #reward = self.get_reward(position, old_position, velocity, old_velocity, done, 2, gamma)
         # velocity
-        if self.reward_type == 3:
+        if self.reward_type == 2:
             reward = self.get_reward(position, old_position, velocity, old_velocity, done, 3, gamma)
         # height
-        if self.reward_type == 4:
+        if self.reward_type == 3:
             reward = self.get_reward(position, old_position, velocity, old_velocity, done, 4, gamma)
         # energy
-        if self.reward_type == 5:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5, gamma)
+        #if self.reward_type == 5:
+            #reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5, gamma)
 
         # reward type 0 : all list of reward
         if self.reward_type == 0:
@@ -172,19 +172,20 @@ class MountainCarRewardEnv(gym.Env):
         reward = 0.0
         if not done:
             # distance from goal_position
-            if reward_type == 2:
-                reward = old_position - gamma * position
+            #if reward_type == 2:
+                #reward = old_position - gamma * position
+                #reward = gamma * position - old_position
             # velocity
-            if reward_type == 3:
+            if reward_type == 2:
                 reward = gamma * velocity - old_velocity
             # height
-            if reward_type == 4:
+            if reward_type == 3:
                 reward = gamma * self._height(position) - self._height(old_position)
             # energy
-            if reward_type == 5:
-                energy = 0.5 * velocity * velocity + 9.8 * self._height(position)
-                old_energy = 0.5 * old_velocity * old_velocity + 9.8 * self._height(old_position)
-                reward = gamma * energy - old_energy
+            #if reward_type == 4:
+                #energy = 0.5 * velocity * velocity + 9.8 * self._height(position)
+                #old_energy = 0.5 * old_velocity * old_velocity + 9.8 * self._height(old_position)
+                #reward = gamma * energy - old_energy
         return reward
 
     ###############################################

@@ -118,7 +118,7 @@ for game in ["cart_pole"]:
 ####################################################
 for game in ["mountain_car"]:
     name = ''.join([g.capitalize() for g in game.split('_')])
-    reward_type_nums = 4
+    reward_type_nums = 3
 
     for obs_type in ['RAM', 'Image']:
         for rt in range(0, reward_type_nums + 1):
