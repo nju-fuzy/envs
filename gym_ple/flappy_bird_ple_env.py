@@ -79,6 +79,8 @@ class PLEFlappyBirdEnv(gym.Env):
 
     def _step(self, a, gamma = 0.99):
         #############################################
+        if isinstance(a,np.ndarray):
+            a = a[0]
         # old observation
         old_ram = self.game_state.getGameState()
         #############################################
