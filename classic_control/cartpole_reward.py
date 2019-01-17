@@ -163,29 +163,34 @@ class CartPoleRewardEnv(gym.Env):
             reward = 0.0
 
         ############################################################
+        if self.reward_type == 1:
+            reward = reward / self.rewards_ths[0]
+
         # position offset as reward
         if self.reward_type == 2:
-            reward = self.get_reward(x, old_x, theta, old_theta, done, 2, gamma)
+            reward = self.get_reward(reward, x, old_x, theta, old_theta, done, 2, gamma)
 
         # angle offset ad reward
         if self.reward_type == 3:
-            reward = self.get_reward(x, old_x, theta, old_theta, done, 3, gamma)
+            reward = self.get_reward(reward, x, old_x, theta, old_theta, done, 3, gamma)
 
         # reward 0, return all reward
         if self.reward_type == 0:
-            reward1 = reward
-            reward2 = self.get_reward(x, old_x, theta, old_theta, done, 2, gamma)
-            reward3 = self.get_reward(x, old_x, theta, old_theta, done, 3, gamma)
+            reward1 = reward / self.rewards_ths[0]
+            reward2 = self.get_reward(reward, x, old_x, theta, old_theta, done, 2, gamma)
+            reward3 = self.get_reward(reward, x, old_x, theta, old_theta, done, 3, gamma)
             reward = np.array([reward1, reward2, reward3])
         ############################################################
 
         ############################################################
+        '''
         # reward scaling
         if self.reward_type == 0:
             for rt in range(len(reward)):
                 reward[rt] = reward[rt] / self.rewards_ths[rt]
         else:
             reward = reward / self.rewards_ths[self.reward_type - 1]
+        '''
         ############################################################
 
         ############################################################
@@ -229,7 +234,7 @@ class CartPoleRewardEnv(gym.Env):
     ###########################################
     # get reward
     ###########################################
-    def get_reward(self, x, old_x, theta, old_theta, done, reward_type, gamma = 0.99):
+    def get_reward(self, src_reward, x, old_x, theta, old_theta, done, reward_type, gamma = 0.99):
         ''' Get reward : 
             reward_type = 2:
                 # position_offset - old_positon_offset
@@ -239,22 +244,22 @@ class CartPoleRewardEnv(gym.Env):
             done:
                 if done : reward = 0.0
         '''
-        reward = 0.0
+        reward = src_reward / self.rewards_ths[0]
         if not done:
             if reward_type == 2:
-                '''
                 # position offset
                 pos_offset = abs(x)
                 old_pos_offset = abs(old_x)
-                reward = old_pos_offset - gamma * pos_offset
+                reward = (src_reward / self.rewards_ths[0]) + (old_pos_offset - gamma * pos_offset) / self.rewards_ths[1]
                 '''
                 pos_offset = abs(x)
                 reward = 1.0 - pos_offset / self.x_threshold
+                '''
             elif reward_type == 3:
                 # angle offset
                 angle_offset = abs(theta)
                 old_angle_offset = abs(old_theta)
-                reward = old_angle_offset - gamma * angle_offset
+                reward = (src_reward / self.rewards_ths[0]) + (old_angle_offset - gamma * angle_offset) / self.rewards_ths[2]
 
         return reward
 

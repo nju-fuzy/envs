@@ -100,12 +100,14 @@ class MountainCarRewardEnv(gym.Env):
         # distance from goal_position
         #if self.reward_type == 2:
             #reward = self.get_reward(position, old_position, velocity, old_velocity, done, 2, gamma)
+        if self.reward_type == 1:
+            reward = reward / self.rewards_ths[0]
         # velocity
         if self.reward_type == 2:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 3, gamma)
+            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 3, gamma)
         # height
         if self.reward_type == 3:
-            reward = self.get_reward(position, old_position, velocity, old_velocity, done, 4, gamma)
+            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 4, gamma)
         # energy
         #if self.reward_type == 5:
             #reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5, gamma)
@@ -113,20 +115,22 @@ class MountainCarRewardEnv(gym.Env):
         # reward type 0 : all list of reward
         if self.reward_type == 0:
             rewards = []
-            rewards.append(reward)
+            rewards.append(reward / self.rewards_ths[0])
             for rt in self.rewards_type_list:
-                reward_i = self.get_reward(position, old_position, velocity, old_velocity, done, rt, gamma)
+                reward_i = self.get_reward(reward, position, old_position, velocity, old_velocity, done, rt, gamma)
                 rewards.append(reward_i)
             reward = np.array(rewards)
         ################################################
 
         ############################################################
+        '''
         # reward scaling
         if self.reward_type == 0:
             for rt in range(len(reward)):
                 reward[rt] = reward[rt] / self.rewards_ths[rt]
         else:
             reward = reward / self.rewards_ths[self.reward_type - 1]
+        '''
         ############################################################
 
         ################################################
@@ -166,10 +170,10 @@ class MountainCarRewardEnv(gym.Env):
     ###############################################
     # get reward
     ###############################################
-    def get_reward(self, position, old_position, velocity, old_velocity, done, reward_type, gamma = 0.99):
+    def get_reward(self, src_reward, position, old_position, velocity, old_velocity, done, reward_type, gamma = 0.99):
         ''' Get reward
         '''
-        reward = 0.0
+        reward = src_reward / self.rewards_ths[0]
         if not done:
             # distance from goal_position
             #if reward_type == 2:
@@ -177,10 +181,10 @@ class MountainCarRewardEnv(gym.Env):
                 #reward = gamma * position - old_position
             # velocity
             if reward_type == 2:
-                reward = gamma * velocity - old_velocity
+                reward = (src_reward / self.rewards_ths[0]) + (gamma * velocity - old_velocity) / self.rewards_ths[1]
             # height
             if reward_type == 3:
-                reward = gamma * self._height(position) - self._height(old_position)
+                reward = (src_reward / self.rewards_ths[0]) + (gamma * self._height(position) - self._height(old_position)) / self.rewards_ths[2]
             # energy
             #if reward_type == 4:
                 #energy = 0.5 * velocity * velocity + 9.8 * self._height(position)

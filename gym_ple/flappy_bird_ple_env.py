@@ -104,14 +104,17 @@ class PLEFlappyBirdEnv(gym.Env):
         if reward == 1.0:
             pass_pipe = True
 
+        if self.reward_type == 1:
+            reward = reward / self.rewards_ths[0]
+
         # reward 2
         if self.reward_type == 2:
-            reward = self.get_reward(old_ram, ram, terminal, 2, pass_pipe, gamma)
+            reward = self.get_reward(reward, old_ram, ram, terminal, 2, pass_pipe, gamma)
 
         # reward 0
         if self.reward_type == 0:
-            reward1 = reward
-            reward2 = self.get_reward(old_ram, ram, terminal, 2, pass_pipe, gamma)
+            reward1 = reward / self.rewards_ths[0]
+            reward2 = self.get_reward(reward, old_ram, ram, terminal, 2, pass_pipe, gamma)
             reward = np.array([reward1, reward2])
             '''
             if reward1 > 0.0:
@@ -123,11 +126,13 @@ class PLEFlappyBirdEnv(gym.Env):
 
         ############################################################
         # reward scaling
+        '''
         if self.reward_type == 0:
             for rt in range(len(reward)):
                 reward[rt] = reward[rt] / self.rewards_ths[rt]
         else:
             reward = reward / self.rewards_ths[self.reward_type - 1]
+        '''
         ############################################################
 
         ##############################################
@@ -142,7 +147,7 @@ class PLEFlappyBirdEnv(gym.Env):
     #############################################
     # Add for reward
     #############################################
-    def get_reward(self, old_ram, ram, done, reward_type, pass_pipe, gamma = 0.99):
+    def get_reward(self, src_reward, old_ram, ram, done, reward_type, pass_pipe, gamma = 0.99):
         ''' 
         @Params:
             old_ram, ram : numpy.array, [dict_values([x1, x2, ..., x8])]
@@ -151,7 +156,7 @@ class PLEFlappyBirdEnv(gym.Env):
         old_ram = list(old_ram[0])
         ram = list(ram[0])
 
-        reward = 0.0
+        reward = src_reward
         if not (done or pass_pipe):
             if reward_type == 2:
                 # distance to middle of two pipes
@@ -159,7 +164,7 @@ class PLEFlappyBirdEnv(gym.Env):
                 py, top_y, bottom_y = ram[0], ram[3], ram[4]
                 old_dis = abs(old_py - (old_top_y + old_bottom_y) / 2.0)
                 dis = abs(py - (top_y + bottom_y) / 2.0)
-                reward = old_dis - gamma * dis
+                reward = (src_reward / self.rewards_ths[0]) + (old_dis - gamma * dis) / self.rewards_ths[1]
                 '''
                 # if pipes changed, reward = 0.0
                 old_next_pipe_distance = old_ram[2]

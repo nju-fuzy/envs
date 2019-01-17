@@ -108,23 +108,28 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         # done?
         done = self.ale.game_over()
 
+        if self.reward_type == 1:
+            reward = reward / self.rewards_ths[0]
+
         # reward_type = 2 : height change
         if self.reward_type == 2:
-            reward = self.get_reward(ob, pre_ob, done, self.reward_type, gamma = gamma)
+            reward = self.get_reward(reward, ob, pre_ob, done, self.reward_type, gamma = gamma)
 
         if self.reward_type == 0:
             reward1 = reward
-            reward2 = self.get_reward(ob, pre_ob, done, 2, gamma = gamma)
+            reward2 = self.get_reward(reward, ob, pre_ob, done, 2, gamma = gamma)
             reward = np.array([reward1, reward2])
         ############################################################
 
         ############################################################
+        '''
         # reward scaling
         if self.reward_type == 0:
             for rt in range(len(reward)):
                 reward[rt] = reward[rt] / self.rewards_ths[rt]
         else:
             reward = reward / self.rewards_ths[self.reward_type - 1]
+        '''
         ############################################################
 
         return ob, reward, done, {"ale.lives": self.ale.lives()}
@@ -133,7 +138,7 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
     ############################################################
     # add self
     ############################################################
-    def get_reward(self, ob, pre_ob, done, reward_type, gamma = 0.99):
+    def get_reward(self, src_reward, ob, pre_ob, done, reward_type, gamma = 0.99):
         ''' Get reward from images!
         @Params:
             ob : observation at current state, numpy.array shape = (210, 160, 3)
@@ -144,10 +149,10 @@ class AtariFreewayEnv(gym.Env, utils.EzPickle):
         '''
         pre_height = self.get_height(pre_ob)
         height = self.get_height(ob)
-        move = gamma * height - pre_height
+        move = (src_reward / self.rewards_ths[0]) + (gamma * height - pre_height) / self.rewards_ths[1]
 
         if done or abs(move) > 10.0:
-            move = 0.0
+            move = src_reward / self.rewards_ths[1]
 
         return move
 

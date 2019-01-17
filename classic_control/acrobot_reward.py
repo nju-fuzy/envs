@@ -181,23 +181,28 @@ class AcrobotRewardEnv(core.Env):
 
         ########################################
         # reward2: height
+        if self.reward_type == 1:
+            reward = reward / self.rewards_ths[0]
+
         if self.reward_type == 2:
-            reward = self.get_reward(old_s, ns, terminal, 2, gamma)
+            reward = self.get_reward(reward, old_s, ns, terminal, 2, gamma)
 
         # a list of [reward1, reward2]
         if self.reward_type == 0:
-            reward1 = reward
-            reward2 = self.get_reward(old_s, ns, terminal, 2, gamma)
+            reward1 = reward / self.rewards_ths[0]
+            reward2 = self.get_reward(reward, old_s, ns, terminal, 2, gamma)
             reward = np.array([reward1, reward2])
         ########################################
 
         ############################################################
+        '''
         # reward scaling
         if self.reward_type == 0:
             for rt in range(len(reward)):
                 reward[rt] = reward[rt] / self.rewards_ths[rt]
         else:
             reward = reward / self.rewards_ths[self.reward_type - 1]
+        '''
         ############################################################
 
         ########################################
@@ -222,7 +227,7 @@ class AcrobotRewardEnv(core.Env):
     ###########################################
     # get reward
     ###########################################
-    def get_reward(self, old_state, state, done, reward_type, gamma = 0.99):
+    def get_reward(self, src_reward, old_state, state, done, reward_type, gamma = 0.99):
         '''
         @Params:
             old_state : a four tuple with (theta1, theta2, theta1_dot, theta2_dot)
@@ -231,15 +236,15 @@ class AcrobotRewardEnv(core.Env):
             reward_type:
                 if 2 return height - old_height
         '''
-        reward = 0.0
+        reward = src_reward / self.rewards_ths[0]
         if not done:
             if reward_type == 2:
                 old_theta1, old_theta2 = old_state[0], old_state[1]
                 theta1, theta2 = state[0], state[1]
                 old_height = -1.0 * (self.LINK_LENGTH_1 * np.cos(old_theta1) + self.LINK_LENGTH_2 * np.cos(old_theta2 + old_theta1))
                 height = -1.0 * (self.LINK_LENGTH_1 * np.cos(theta1) + self.LINK_LENGTH_2 * np.cos(theta2 + theta1))
-                #reward = gamma * height - old_height
-                reward = height
+                reward = (src_reward / self.rewards_ths[0]) + (gamma * height - old_height) / self.rewards_ths[1]
+                #reward = height
         return reward
     ###########################################
 

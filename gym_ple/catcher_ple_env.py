@@ -97,24 +97,29 @@ class PLECatcherEnv(gym.Env):
         #############################################
 
         #############################################
+        if self.reward_type == 1:
+            reward = reward / self.rewards_ths[0]
+
         # reward 2
         if self.reward_type == 2:
-            reward = self.get_reward(old_ram, ram, terminal, 2, gamma)
+            reward = self.get_reward(reward, old_ram, ram, terminal, 2, gamma)
 
         # reward 0
         if self.reward_type == 0:
-            reward1 = reward
-            reward2 = self.get_reward(old_ram, ram, terminal, 2, gamma)
+            reward1 = reward / self.rewards_ths[0]
+            reward2 = self.get_reward(reward, old_ram, ram, terminal, 2, gamma)
             reward = np.array([reward1, reward2])
         ##############################################
 
         ############################################################
+        '''
         # reward scaling
         if self.reward_type == 0:
             for rt in range(len(reward)):
                 reward[rt] = reward[rt] / self.rewards_ths[rt]
         else:
             reward = reward / self.rewards_ths[self.reward_type - 1]
+        '''
         ############################################################
 
         ##############################################
@@ -129,7 +134,7 @@ class PLECatcherEnv(gym.Env):
     #############################################
     # Add for reward
     #############################################
-    def get_reward(self, old_ram, ram, done, reward_type, gamma):
+    def get_reward(self, src_reward, old_ram, ram, done, reward_type, gamma):
         ''' 
         @Params:
             old_ram, ram : numpy.array, [dict_values([x, y, z, w])]
@@ -137,7 +142,7 @@ class PLECatcherEnv(gym.Env):
         '''
         old_ram = list(old_ram[0])
         ram = list(ram[0])
-        reward = 0.0
+        reward = src_reward
         if not done:
             if reward_type == 2:
                 old_px, old_fx = old_ram[0], old_ram[2]
@@ -153,6 +158,8 @@ class PLECatcherEnv(gym.Env):
 
                 reward = min(reward, 2.0)
                 reward = max(reward, -2.0)
+
+                reward = src_reward / self.rewards_ths[0] + reward / self.rewards_ths[1]
         return reward
     #############################################
     #############################################
