@@ -49,7 +49,7 @@ class MountainCarRewardEnv(gym.Env):
         self.obs_type = obs_type
         self.reward_type = reward_type
 
-        self.rewards_type_list = [2, 3]
+        self.rewards_type_list = [2, 3, 4]
         # every reward type's max-abs value
         self.rewards_ths = [1.0, 0.005, 0.01]
 
@@ -104,13 +104,17 @@ class MountainCarRewardEnv(gym.Env):
             reward = reward / self.rewards_ths[0]
         # velocity
         if self.reward_type == 2:
-            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 3, gamma)
+            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 2, gamma)
         # height
         if self.reward_type == 3:
-            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 4, gamma)
+            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 3, gamma)
         # energy
         #if self.reward_type == 5:
             #reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5, gamma)
+
+        # reward + random
+        if self.reward_type == 4:
+            reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 4, gamma)
 
         # reward type 0 : all list of reward
         if self.reward_type == 0:
@@ -185,6 +189,9 @@ class MountainCarRewardEnv(gym.Env):
             # height
             if reward_type == 3:
                 reward = (src_reward / self.rewards_ths[0]) + (gamma * self._height(position) - self._height(old_position)) / self.rewards_ths[2]
+            # reward + random
+            if reward_type == 4:
+                reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
             # energy
             #if reward_type == 4:
                 #energy = 0.5 * velocity * velocity + 9.8 * self._height(position)

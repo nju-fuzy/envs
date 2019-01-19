@@ -187,11 +187,15 @@ class AcrobotRewardEnv(core.Env):
         if self.reward_type == 2:
             reward = self.get_reward(reward, old_s, ns, terminal, 2, gamma)
 
+        if self.reward_type == 3:
+            reward = self.get_reward(reward, old_s, ns, terminal, 3, gamma)
+
         # a list of [reward1, reward2]
         if self.reward_type == 0:
             reward1 = reward / self.rewards_ths[0]
             reward2 = self.get_reward(reward, old_s, ns, terminal, 2, gamma)
-            reward = np.array([reward1, reward2])
+            reward3 = self.get_reward(reward, old_s, ns, terminal, 3, gamma)
+            reward = np.array([reward1, reward2, reward3])
         ########################################
 
         ############################################################
@@ -245,6 +249,9 @@ class AcrobotRewardEnv(core.Env):
                 height = -1.0 * (self.LINK_LENGTH_1 * np.cos(theta1) + self.LINK_LENGTH_2 * np.cos(theta2 + theta1))
                 reward = (src_reward / self.rewards_ths[0]) + (gamma * height - old_height) / self.rewards_ths[1]
                 #reward = height
+            elif reward_type == 3:
+                reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
+
         return reward
     ###########################################
 

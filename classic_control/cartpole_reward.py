@@ -174,12 +174,17 @@ class CartPoleRewardEnv(gym.Env):
         if self.reward_type == 3:
             reward = self.get_reward(reward, x, old_x, theta, old_theta, done, 3, gamma)
 
+        # random
+        if self.reward_type == 4:
+            reward = self.get_reward(reward, x, old_x, theta, old_theta, done, 4, gamma)
+
         # reward 0, return all reward
         if self.reward_type == 0:
             reward1 = reward / self.rewards_ths[0]
             reward2 = self.get_reward(reward, x, old_x, theta, old_theta, done, 2, gamma)
             reward3 = self.get_reward(reward, x, old_x, theta, old_theta, done, 3, gamma)
-            reward = np.array([reward1, reward2, reward3])
+            reward4 = self.get_reward(reward, x, old_x, theta, old_theta, done, 4, gamma)
+            reward = np.array([reward1, reward2, reward3, reward4])
         ############################################################
 
         ############################################################
@@ -260,6 +265,8 @@ class CartPoleRewardEnv(gym.Env):
                 angle_offset = abs(theta)
                 old_angle_offset = abs(old_theta)
                 reward = (src_reward / self.rewards_ths[0]) + (old_angle_offset - gamma * angle_offset) / self.rewards_ths[2]
+            elif reward_type == 4:
+                reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
 
         return reward
 
