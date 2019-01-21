@@ -191,7 +191,8 @@ class MountainCarRewardEnv(gym.Env):
                 reward = (src_reward / self.rewards_ths[0]) + (gamma * self._height(position) - self._height(old_position)) / self.rewards_ths[2]
             # reward + random
             if reward_type == 4:
-                reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
+                #reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
+                reward = (src_reward / self.rewards_ths[0]) + gamma * position - old_position
             # energy
             #if reward_type == 4:
                 #energy = 0.5 * velocity * velocity + 9.8 * self._height(position)

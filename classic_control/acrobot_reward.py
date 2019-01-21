@@ -250,8 +250,10 @@ class AcrobotRewardEnv(core.Env):
                 reward = (src_reward / self.rewards_ths[0]) + (gamma * height - old_height) / self.rewards_ths[1]
                 #reward = height
             elif reward_type == 3:
-                reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
-
+                #reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
+                old_theta_dot1, old_theta_dot2 = abs(old_state[2]), abs(old_state[3])
+                theta_dot1, theta_dot2 = abs(state[2]), abs(state[3])
+                reward = (src_reward / self.rewards_ths[0]) + (gamma * (theta_dot1+theta_dot2) - (old_theta_dot1+old_theta_dot2))
         return reward
     ###########################################
 

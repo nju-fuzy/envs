@@ -183,8 +183,8 @@ class CartPoleRewardEnv(gym.Env):
             reward1 = reward / self.rewards_ths[0]
             reward2 = self.get_reward(reward, x, old_x, theta, old_theta, done, 2, gamma)
             reward3 = self.get_reward(reward, x, old_x, theta, old_theta, done, 3, gamma)
-            reward4 = self.get_reward(reward, x, old_x, theta, old_theta, done, 4, gamma)
-            reward = np.array([reward1, reward2, reward3, reward4])
+            #reward4 = self.get_reward(reward, x, old_x, theta, old_theta, done, 4, gamma)
+            reward = np.array([reward1, reward2, reward3])
         ############################################################
 
         ############################################################
