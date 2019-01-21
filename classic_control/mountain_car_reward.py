@@ -51,7 +51,7 @@ class MountainCarRewardEnv(gym.Env):
 
         self.rewards_type_list = [2, 3, 4]
         # every reward type's max-abs value
-        self.rewards_ths = [1.0, 0.005, 0.01]
+        self.rewards_ths = [1.0, 0.005, 0.05, 0.05]
 
         # change observation space:
         if self.obs_type == "Image":
@@ -112,7 +112,7 @@ class MountainCarRewardEnv(gym.Env):
         #if self.reward_type == 5:
             #reward = self.get_reward(position, old_position, velocity, old_velocity, done, 5, gamma)
 
-        # reward + random
+        # position
         if self.reward_type == 4:
             reward = self.get_reward(reward, position, old_position, velocity, old_velocity, done, 4, gamma)
 
@@ -189,10 +189,10 @@ class MountainCarRewardEnv(gym.Env):
             # height
             if reward_type == 3:
                 reward = (src_reward / self.rewards_ths[0]) + (gamma * self._height(position) - self._height(old_position)) / self.rewards_ths[2]
-            # reward + random
+            # position
             if reward_type == 4:
                 #reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
-                reward = (src_reward / self.rewards_ths[0]) + gamma * position - old_position
+                reward = (src_reward / self.rewards_ths[0]) + (gamma * position - old_position) / self.rewards_ths[3]
             # energy
             #if reward_type == 4:
                 #energy = 0.5 * velocity * velocity + 9.8 * self._height(position)

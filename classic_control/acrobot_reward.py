@@ -109,7 +109,7 @@ class AcrobotRewardEnv(core.Env):
         self.reward_type = reward_type
 
         # every reward type's max-abs value
-        self.rewards_ths = [1.0, 0.2]
+        self.rewards_ths = [1.0, 0.2, 10.0]
 
         # change observation space:
         if self.obs_type == "Image":
@@ -253,7 +253,7 @@ class AcrobotRewardEnv(core.Env):
                 #reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
                 old_theta_dot1, old_theta_dot2 = abs(old_state[2]), abs(old_state[3])
                 theta_dot1, theta_dot2 = abs(state[2]), abs(state[3])
-                reward = (src_reward / self.rewards_ths[0]) + (gamma * (theta_dot1+theta_dot2) - (old_theta_dot1+old_theta_dot2))
+                reward = (src_reward / self.rewards_ths[0]) + (gamma * (theta_dot1+theta_dot2) - (old_theta_dot1+old_theta_dot2)) / self.rewards_ths[2]
         return reward
     ###########################################
 
