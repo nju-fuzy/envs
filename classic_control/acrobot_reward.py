@@ -117,6 +117,8 @@ class AcrobotRewardEnv(core.Env):
             self.img_height = 84
             self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
+
+        self.weights = np.random.randn(4)
         ###########################################
 
 
@@ -195,6 +197,17 @@ class AcrobotRewardEnv(core.Env):
             reward1 = reward / self.rewards_ths[0]
             reward2 = self.get_reward(reward, old_s, ns, terminal, 2, gamma)
             reward3 = self.get_reward(reward, old_s, ns, terminal, 3, gamma)
+
+            '''
+            # phi(s)
+            r_now = np.dot(self.weights, np.array(ns))
+            r_old = np.dot(self.weights, np.array(old_s))
+            r4 = gamma * r_now - r_old
+            print(r4)
+            reward4 = reward / self.rewards_ths[0] + r4 / 1.0
+            reward = np.array([reward1, reward2, reward3, reward4])
+            '''
+
             reward = np.array([reward1, reward2, reward3])
         ########################################
 

@@ -59,6 +59,8 @@ class MountainCarRewardEnv(gym.Env):
             self.img_height = 84
             self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
+
+        self.weights = np.random.randn(2)
         ###########################################
 
         self.seed()
@@ -123,6 +125,17 @@ class MountainCarRewardEnv(gym.Env):
             for rt in self.rewards_type_list:
                 reward_i = self.get_reward(reward, position, old_position, velocity, old_velocity, done, rt, gamma)
                 rewards.append(reward_i)
+
+            '''
+            # phi(s)
+            r_now = np.dot(self.weights, np.array([position, velocity]))
+            r_old = np.dot(self.weights, np.array([old_position, old_velocity]))
+            r4 = gamma * r_now - r_old
+            print(r4)
+            reward4 = reward / self.rewards_ths[0] + r4 / 0.2
+            rewards.append(r4)
+            '''
+
             reward = np.array(rewards)
         ################################################
 

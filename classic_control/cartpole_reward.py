@@ -109,6 +109,8 @@ class CartPoleRewardEnv(gym.Env):
             self.img_height = 84
             self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
+
+        self.weights = np.random.randn(4)
         ############################################
 
     def seed(self, seed=None):
@@ -183,7 +185,17 @@ class CartPoleRewardEnv(gym.Env):
             reward1 = reward / self.rewards_ths[0]
             reward2 = self.get_reward(reward, x, old_x, theta, old_theta, done, 2, gamma)
             reward3 = self.get_reward(reward, x, old_x, theta, old_theta, done, 3, gamma)
-            #reward4 = self.get_reward(reward, x, old_x, theta, old_theta, done, 4, gamma)
+
+            # phi(s)
+            '''
+            r_now = np.dot(self.weights, np.array([x, x_dot, theta, theta_dot]))
+            r_old = np.dot(self.weights, np.array([old_x, old_x_dot, old_theta, old_theta_dot]))
+            r4 = gamma * r_now - r_old
+            print(r4)
+            reward4 = reward / self.rewards_ths[0] + r4 / 1.0
+            reward = np.array([reward1, reward2, reward3, reward4])
+            '''
+
             reward = np.array([reward1, reward2, reward3])
         ############################################################
 
@@ -265,8 +277,6 @@ class CartPoleRewardEnv(gym.Env):
                 angle_offset = abs(theta)
                 old_angle_offset = abs(old_theta)
                 reward = (src_reward / self.rewards_ths[0]) + (old_angle_offset - gamma * angle_offset) / self.rewards_ths[2]
-            elif reward_type == 4:
-                reward = (src_reward / self.rewards_ths[0]) + 0.2 * np.random.randn()
 
         return reward
 
