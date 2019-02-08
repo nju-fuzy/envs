@@ -126,15 +126,15 @@ class MountainCarRewardEnv(gym.Env):
                 reward_i = self.get_reward(reward, position, old_position, velocity, old_velocity, done, rt, gamma)
                 rewards.append(reward_i)
 
-            '''
+            
             # phi(s)
             r_now = np.dot(self.weights, np.array([position, velocity]))
             r_old = np.dot(self.weights, np.array([old_position, old_velocity]))
             r4 = gamma * r_now - r_old
-            print(r4)
+            #print(r4)
             reward4 = reward / self.rewards_ths[0] + r4 / 0.2
-            rewards.append(r4)
-            '''
+            rewards.append(reward4)
+            
 
             reward = np.array(rewards)
         ################################################
