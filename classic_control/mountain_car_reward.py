@@ -60,7 +60,9 @@ class MountainCarRewardEnv(gym.Env):
             self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
 
-        self.weights = np.random.randn(2)
+        self.weight1 = np.array([-0.38732682, -0.30230275])
+        self.weight2 = np.array([-1.70627019, 1.9507754 ])
+        self.weight3 = np.array([-1.61389785, -0.21274028])
         ###########################################
 
         self.seed()
@@ -128,12 +130,21 @@ class MountainCarRewardEnv(gym.Env):
 
             
             # phi(s)
-            r_now = np.dot(self.weights, np.array([position, velocity]))
-            r_old = np.dot(self.weights, np.array([old_position, old_velocity]))
-            r4 = gamma * r_now - r_old
-            #print(r4)
+            s_new = np.array([position, velocity])
+            s_old = np.array([old_position, old_velocity])
+
+            r4 = gamma * np.dot(self.weight1, s_new) - np.dot(self.weight1, s_old)
             reward4 = reward / self.rewards_ths[0] + r4 / 0.2
+
+            r5 = gamma * np.dot(self.weight2, s_new) - np.dot(self.weight2, s_old)
+            reward5 = reward / self.rewards_ths[0] + r5 / 0.2
+
+            r6 = gamma * np.dot(self.weight3, s_new) - np.dot(self.weight3, s_old)
+            reward6 = reward / self.rewards_ths[0] + r6 / 0.2
+
             rewards.append(reward4)
+            rewards.append(reward5)
+            rewards.append(reward6)
             
 
             reward = np.array(rewards)
