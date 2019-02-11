@@ -110,9 +110,8 @@ class CartPoleRewardEnv(gym.Env):
             self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
 
-        self.weight1 = np.array([-0.2083204, 0.49491342, -1.16793841, -2.50086906])
+        self.weight1 = np.array([-0.4083204, 0.59491342, 0.42793841, 1.50086906])
         self.weight2 = np.array([0.9634897, -1.16497369, -1.28419204, -0.8968168])
-        self.weight3 = np.array([-0.98090804, -1.44074017, 0.69819468, -0.283458])
         ############################################
 
     def seed(self, seed=None):

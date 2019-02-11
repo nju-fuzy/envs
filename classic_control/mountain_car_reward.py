@@ -60,9 +60,8 @@ class MountainCarRewardEnv(gym.Env):
             self.img_shape = (self.img_width, self.img_height, 3)
             self.observation_space = spaces.Box(low = 0, high = 255, shape = self.img_shape, dtype = np.uint8)
 
-        self.weight1 = np.array([-0.38732682, -0.30230275])
-        self.weight2 = np.array([-1.70627019, 1.9507754 ])
-        self.weight3 = np.array([-1.61389785, -0.21274028])
+        self.weight1 = np.array([0.38732682, -0.30230275])
+        self.weight2 = np.array([-1.70627019, 0.2507754 ])
         ###########################################
 
         self.seed()
