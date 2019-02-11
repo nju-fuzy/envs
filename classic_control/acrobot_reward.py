@@ -207,10 +207,7 @@ class AcrobotRewardEnv(core.Env):
             r5 = gamma * np.dot(self.weight2, np.array(ns)) - np.dot(self.weight2, np.array(old_s))
             reward5 = reward / self.rewards_ths[0] + r5 / 1.0
 
-            r6 = gamma * np.dot(self.weight3, np.array(ns)) - np.dot(self.weight3, np.array(old_s))
-            reward6 = reward / self.rewards_ths[0] + r6 / 1.0
-
-            reward = np.array([reward1, reward2, reward3, reward4, reward5, reward6])
+            reward = np.array([reward1, reward2, reward3, reward4, reward5])
 
             #reward = np.array([reward1, reward2, reward3])
         ########################################

@@ -138,12 +138,8 @@ class MountainCarRewardEnv(gym.Env):
             r5 = gamma * np.dot(self.weight2, s_new) - np.dot(self.weight2, s_old)
             reward5 = reward / self.rewards_ths[0] + r5 / 0.2
 
-            r6 = gamma * np.dot(self.weight3, s_new) - np.dot(self.weight3, s_old)
-            reward6 = reward / self.rewards_ths[0] + r6 / 0.2
-
             rewards.append(reward4)
             rewards.append(reward5)
-            rewards.append(reward6)
             
 
             reward = np.array(rewards)
